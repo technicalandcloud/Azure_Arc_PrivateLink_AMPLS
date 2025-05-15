@@ -31,14 +31,14 @@ The goal is to understand and test:
 - Azure CLI
 - Terraform installed locally
 - A **Service Principal** with `Contributor` role on a **subscription**
-
+---
 ### Quick SPN creation:
 
 ```bash
 az login
 subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
-
+---
 ## ⚙️ Post-Deployment Steps
 
 After the Terraform deployment completes:
@@ -60,7 +60,7 @@ After the Terraform deployment completes:
 ![image](https://github.com/user-attachments/assets/f70306a7-60be-4a6b-9c7a-5be6deefd72e)
 ![image](https://github.com/user-attachments/assets/da91d339-ec74-4067-b21a-4dbc14fd4aaf)
 ![image](https://github.com/user-attachments/assets/5ffc5cc1-d3f9-469c-b596-5b0fd5aeab23)
-
+---
 ## 🧪 Test Result
 
 Once the deployment and configuration are complete:
