@@ -15,6 +15,9 @@ The goal is to understand and test:
 - How **AMPLS** works in a private network
 - DNS resolution via **Private DNS Zones**
 
+![image](https://github.com/user-attachments/assets/5207efe9-5d78-4bd6-96ec-093443f87a7a)
+
+
 > ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
 
 ---
