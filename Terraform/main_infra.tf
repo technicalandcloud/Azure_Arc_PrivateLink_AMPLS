@@ -509,7 +509,7 @@ resource "azurerm_virtual_machine_extension" "arc_script" {
 protected_settings = <<PROTECTED
 {
   "fileUris": [
-    "https://raw.githubusercontent.com/technicalandcloud/azure_arc/refs/heads/main/azure_arc_servers_jumpstart/privatelink/artifacts/Bootstrap.ps1"
+    "https://raw.githubusercontent.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/refs/heads/main/privatelink/artifacts/Bootstrap.ps1"
   ],
   "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -File Bootstrap.ps1 -appId ${var.client_id} -password ${var.client_secret} -tenantId ${var.tenant_id} -resourceGroup Arc-Azure-RG -subscriptionId ${var.subscription_id} -location francecentral -PLscope /subscriptions/${var.subscription_id}/resourceGroups/Arc-Azure-RG/providers/Microsoft.HybridCompute/privateLinkScopes/Arc-HIS-Scope -PEname Arc-PE -adminUsername ${var.admin_username}"
 }
