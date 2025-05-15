@@ -40,15 +40,7 @@ subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
 
 
-⚙️ Étapes post-déploiement
-
-1- Une fois le déploiement Terraform terminé :
-2- Liez le Private Endpoint de la DCE au AMPLS
-3-Vérifiez que la Private DNS Zone contient bien les enregistrements associés
-4-Connectez-vous via Azure Bastion à la VM déployée
-5-Laissez s’exécuter le script PowerShell embarqué
-
-⚙️ Post-Deployment Steps
+## ⚙️ Post-Deployment Steps
 After the Terraform deployment completes:
 
 Link the Private Endpoint of the DCE to your AMPLS
@@ -71,7 +63,7 @@ Logs will be collected privately via AMPLS
 ![image](https://github.com/user-attachments/assets/da91d339-ec74-4067-b21a-4dbc14fd4aaf)
 ![image](https://github.com/user-attachments/assets/5ffc5cc1-d3f9-469c-b596-5b0fd5aeab23)
 
-🧪 Test Result
+##🧪 Test Result
 Once completed, you can connect to the VM via Bastion, let the PowerShell script execute, and within a few minutes:
 
 The Azure Arc resource is successfully onboarded
