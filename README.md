@@ -43,6 +43,20 @@ subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
 ```
 ---
+## 🚀 Deployment with Terraform
+
+Run the Terraform script by providing the following input variables:
+
+- `client_id`
+- `client_secret`
+- `tenant_id`
+- `subscription_id`
+- `admin_username`
+- `admin_password`
+
+
+Ces identifiants sont liés au Service Principal créé précédemment.
+---
 ## ⚙️ Post-Deployment Steps
 
 After the Terraform deployment completes:
