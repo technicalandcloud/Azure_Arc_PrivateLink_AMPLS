@@ -39,42 +39,34 @@ az login
 subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
 
-
 ## ⚙️ Post-Deployment Steps
+
 After the Terraform deployment completes:
 
-Link the Private Endpoint of the DCE to your AMPLS
+1. 🔗 Link the **Private Endpoint** of the `Data Collection Endpoint (DCE)` to your **AMPLS**
+2. 🧾 Verify that the **Private DNS Zone** contains the correct records
+3. 💻 Connect to the deployed VM using **Azure Bastion**
+4. ▶️ Let the embedded **PowerShell** script run automatically
 
-Verify that the Private DNS Zone contains the correct records
+---
 
-Connect to the deployed VM using Azure Bastion
+⏱️ After a few minutes:
 
-Let the embedded PowerShell script run automatically
+- ✅ The **Azure Arc** resource will appear in the Azure portal  
+- 📦 The `Azure Monitor Agent (AMA)` extension will be applied automatically  
+- 🔐 Logs will be collected **privately** via **AMPLS**
 
-After a few minutes:
-
-The Azure Arc resource will appear in the Azure portal
-
-The Azure Monitor Agent (AMA) extension will be applied automatically
-
-Logs will be collected privately via AMPLS
 
 ![image](https://github.com/user-attachments/assets/f70306a7-60be-4a6b-9c7a-5be6deefd72e)
 ![image](https://github.com/user-attachments/assets/da91d339-ec74-4067-b21a-4dbc14fd4aaf)
 ![image](https://github.com/user-attachments/assets/5ffc5cc1-d3f9-469c-b596-5b0fd5aeab23)
 
-##🧪 Test Result
-Once completed, you can connect to the VM via Bastion, let the PowerShell script execute, and within a few minutes:
+## 🧪 Test Result
 
-The Azure Arc resource is successfully onboarded
+Once the deployment and configuration are complete:
 
-The AMA extension is installed
+- ✅ The **Azure Arc** resource is successfully onboarded  
+- 📦 The `Azure Monitor Agent (AMA)` extension is installed  
+- 🔍 You can view logs **privately** through **AMPLS**  
+- 🧠 Data collection and monitoring work securely via **Private Link**
 
-You can view logs privately through AMPLS🧪 Test Result
-Once completed, you can connect to the VM via Bastion, let the PowerShell script execute, and within a few minutes:
-
-The Azure Arc resource is successfully onboarded
-
-The AMA extension is installed
-
-You can view logs privately through AMPLS
