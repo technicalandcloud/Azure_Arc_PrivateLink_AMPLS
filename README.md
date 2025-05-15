@@ -1,16 +1,41 @@
-Ce repo à pour but d'aider les personnes qui souhaite utiliser un environnement SandBox pour comprendre le fonctionnement de Azure Arc Private & l' Azure Monitor Private link Scope, cet environnement est full privée.
+# Azure Arc + AMPLS Sandbox (Environnement privé)
 
-Vous retrouverez dans le dossier "Terraform" le script permettant de déployer cet infrastrucutre, de test, attention cela n'est pas à mettre en production
+Ce dépôt propose un environnement Sandbox complet pour explorer **Azure Arc** et **Azure Monitor Private Link Scope (AMPLS)**, en **mode full privé** via Private Link.
 
-Pour pouvoir executer ce script vous devez avoir une app registration de créér je vous invite donc à saisir cet commande pour une création simple est rapide:
+ ℹ️ Ce projet s’appuie sur le travail de la communauté [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
+ Le code Terraform utilisé ici a été adapté à partir des déploiements proposés par Jumpstart pour créer un environnement privé basé sur Azure Arc, AMPLS et Private Link.
 
+## 🎯 Objectif
+
+Comprendre et tester :
+- L'intégration d'une machine hybride avec **Azure Arc**
+- Le fonctionnement d’un **AMPLS** en environnement privé
+- Le routage DNS privé via Private DNS Zone
+
+ ⚠️ Cet environnement est à usage de **test uniquement**. Il **ne doit pas être utilisé en production**.
+
+---
+
+## 📦 Structure du dépôt
+
+- `Terraform/` : Scripts Terraform pour déployer l'environnement complet.
+- `privatelink/artifacts/` : Fichiers de support (scripts, configurations, etc.)
+
+---
+
+## ✅ Prérequis
+
+- Azure CLI
+- Terraform installé localement
+- Un **Service Principal** avec le rôle `Contributor` sur une **Subscription**
+
+### Création rapide d’un SPN  :
 az login
 subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
 
-Une fois cela effectué, lors de l'execution du terraform il vous sera demandé d'insérer le Client ID, le Secret, le Tenant ID, le Subscription ID, le Admin UserName & le Password.
-
-Une fois le script fini est pour un test optimal vous devez suivre les dernières étapes ci dessous, cela est très important pour que la DCE soit bien reconnu dans la private DNS Zone:
+⚙️ Étapes post-déploiement
+Une fois le déploiement veuillez bien à lié le private Endpont DCE sur le AMPLS & à vérifier la private dns zone est bien renseginé
 
 ![image](https://github.com/user-attachments/assets/f70306a7-60be-4a6b-9c7a-5be6deefd72e)
 ![image](https://github.com/user-attachments/assets/da91d339-ec74-4067-b21a-4dbc14fd4aaf)
