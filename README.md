@@ -34,10 +34,11 @@ The goal is to understand and test:
 ---
 ### Quick SPN creation:
 
-```bash
+```
 az login
 subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
+```
 ---
 ## ⚙️ Post-Deployment Steps
 
