@@ -89,3 +89,6 @@ Once the deployment and configuration are complete:
 - 🔍 You can view logs **privately** through **AMPLS**  
 - 🧠 Data collection and monitoring work securely via **Private Link**
 
+![image](https://github.com/user-attachments/assets/934640df-03ad-411c-9d78-744e924b6ebd)
+
+
