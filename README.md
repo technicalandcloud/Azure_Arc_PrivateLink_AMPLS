@@ -53,9 +53,8 @@ Run the Terraform script by providing the following input variables:
 - `subscription_id`
 - `admin_username`
 - `admin_password`
+These identifiers are linked to the Main Service created earlier.
 
-
-Ces identifiants sont liés au Service Principal créé précédemment.
 ---
 ## ⚙️ Post-Deployment Steps
 
