@@ -1,44 +1,88 @@
-# Azure Arc + AMPLS Sandbox (Environnement privé)
+# Azure Arc + AMPLS Sandbox (Private Environment)
 
-Ce dépôt propose un environnement Sandbox complet pour explorer **Azure Arc** et **Azure Monitor Private Link Scope (AMPLS)**, en **mode full privé** via Private Link.
+This repository provides a complete sandbox environment to explore **Azure Arc** and **Azure Monitor Private Link Scope (AMPLS)** in a **fully private setup using Azure Private Link**.
 
- ℹ️ Ce projet s’appuie sur le travail de la communauté [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
- Le code Terraform utilisé ici a été adapté à partir des déploiements proposés par Jumpstart pour créer un environnement privé basé sur Azure Arc, AMPLS et Private Link.
-
-## 🎯 Objectif
-
-Comprendre et tester :
-- L'intégration d'une machine hybride avec **Azure Arc**
-- Le fonctionnement d’un **AMPLS** en environnement privé
-- Le routage DNS privé via Private DNS Zone
-
- ⚠️ Cet environnement est à usage de **test uniquement**. Il **ne doit pas être utilisé en production**.
+> ℹ️ This project is based on the community work from [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
+> The Terraform code has been adapted from Jumpstart deployments to build a private environment integrating Azure Arc, AMPLS, and Private Link.
 
 ---
 
-## 📦 Structure du dépôt
+## 🎯 Purpose
 
-- `Terraform/` : Scripts Terraform pour déployer l'environnement complet.
-- `privatelink/artifacts/` : Fichiers de support (scripts, configurations, etc.)
+The goal is to understand and test:
+
+- Hybrid machine onboarding with **Azure Arc**
+- How **AMPLS** works in a private network
+- DNS resolution via **Private DNS Zones**
+
+> ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
 
 ---
 
-## ✅ Prérequis
+## 📦 Repository Structure
+
+- `Terraform/`: Terraform scripts to deploy the full environment.
+- `privatelink/artifacts/`: Supporting files (scripts, configurations, etc.)
+
+---
+
+## ✅ Prerequisites
 
 - Azure CLI
-- Terraform installé localement
-- Un **Service Principal** avec le rôle `Contributor` sur une **Subscription**
+- Terraform installed locally
+- A **Service Principal** with `Contributor` role on a **subscription**
 
-### Création rapide d’un SPN  :
+### Quick SPN creation:
+
+```bash
 az login
 subscriptionId=$(az account show --query id --output tsv)
 az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscriptions/$subscriptionId
 
+
 ⚙️ Étapes post-déploiement
-Une fois le déploiement veuillez bien à lié le private Endpont DCE sur le AMPLS & à vérifier la private dns zone est bien renseginé
+
+1- Une fois le déploiement Terraform terminé :
+2- Liez le Private Endpoint de la DCE au AMPLS
+3-Vérifiez que la Private DNS Zone contient bien les enregistrements associés
+4-Connectez-vous via Azure Bastion à la VM déployée
+5-Laissez s’exécuter le script PowerShell embarqué
+
+⚙️ Post-Deployment Steps
+After the Terraform deployment completes:
+
+Link the Private Endpoint of the DCE to your AMPLS
+
+Verify that the Private DNS Zone contains the correct records
+
+Connect to the deployed VM using Azure Bastion
+
+Let the embedded PowerShell script run automatically
+
+After a few minutes:
+
+The Azure Arc resource will appear in the Azure portal
+
+The Azure Monitor Agent (AMA) extension will be applied automatically
+
+Logs will be collected privately via AMPLS
 
 ![image](https://github.com/user-attachments/assets/f70306a7-60be-4a6b-9c7a-5be6deefd72e)
 ![image](https://github.com/user-attachments/assets/da91d339-ec74-4067-b21a-4dbc14fd4aaf)
 ![image](https://github.com/user-attachments/assets/5ffc5cc1-d3f9-469c-b596-5b0fd5aeab23)
 
-Une fois terminé, vous pouvez lancer la VM depuis le Bastion et laisser executer le script Powerhsell, après quelques minutes, la resource Azure Arc remonte correctement la policy applique l'extension AMA et vous pouvez consulter les logs de manière privé grâce au AMPLS
+🧪 Test Result
+Once completed, you can connect to the VM via Bastion, let the PowerShell script execute, and within a few minutes:
+
+The Azure Arc resource is successfully onboarded
+
+The AMA extension is installed
+
+You can view logs privately through AMPLS🧪 Test Result
+Once completed, you can connect to the VM via Bastion, let the PowerShell script execute, and within a few minutes:
+
+The Azure Arc resource is successfully onboarded
+
+The AMA extension is installed
+
+You can view logs privately through AMPLS
