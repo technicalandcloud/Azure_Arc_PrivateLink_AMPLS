@@ -1,39 +1,41 @@
-# Azure Arc + AMPLS Sandbox (Private Environment)
+# Azure Arc Jumpstart with Private Link (Terraform)
 
-This repository provides a complete sandbox environment to explore **Azure Arc** and **Azure Monitor Private Link Scope (AMPLS)** in a **fully private setup using Azure Private Link**.
-
-> ℹ️ This project is based on the community work from [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
-> The Terraform code has been adapted from Jumpstart deployments to build a private environment integrating Azure Arc, AMPLS, and Private Link.
+This Terraform configuration deploys a full Azure Arc-enabled infrastructure scenario using **Azure Virtual Network Gateway connections** between simulated **on-premises** and **Azure** environments. It includes support for **Azure Arc Private Link**, **Windows VM onboarding**, and **secure remote access via Azure Bastion**.
 
 ---
 
-## 🎯 Purpose
+## 📌 Features
 
-The goal is to understand and test:
-
-- Hybrid machine onboarding with **Azure Arc**
-- How **AMPLS** works in a private network
-- DNS resolution via **Private DNS Zones**
-
-![image](https://github.com/user-attachments/assets/5207efe9-5d78-4bd6-96ec-093443f87a7a)
-
-
-> ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
+- Dual virtual network setup (on-prem & Azure)
+- VNet-to-VNet VPN gateway connections
+- Azure Arc Private Link Scope & Private Endpoint
+- Windows Server VM onboarding to Azure Arc
+- Custom Script Extension for automatic registration
+- Azure Bastion host for RDP access
+- Private DNS zone configuration
+- Network security rules
 
 ---
 
-## 📦 Repository Structure
 
-- `Terraform/`: Terraform scripts to deploy the full environment.
-- `privatelink/artifacts/`: Supporting files (scripts, configurations, etc.)
-
----
 
 ## ✅ Prerequisites
 
 - Azure CLI
 - Terraform installed locally
 - A **Service Principal** with `Contributor` role on a **subscription**
+- [Terraform CLI](https://developer.hashicorp.com/terraform/downloads)
+- Azure Subscription
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+- An Azure AD App registration with:
+  - `Client ID`
+  - `Client Secret`
+  - `Tenant ID`
+  - 'Subscription ID'
+  - 'VM Password'
+  - 'VM User'
+
+
 ---
 ### Quick SPN creation:
 
@@ -54,30 +56,6 @@ Run the Terraform script by providing the following input variables:
 - `admin_username`
 - `admin_password`
 These identifiers are linked to the Main Service created earlier.
-
----
-## ⚙️ Post-Deployment Steps
-
-After the Terraform deployment completes:
-
-1. 🔗 Link the **Private Endpoint** of the `Data Collection Endpoint (DCE)` to your **AMPLS**
-2. 🧾 Verify that the **Private DNS Zone** contains the correct records
-3. 💻 Connect to the deployed VM using **Azure Bastion**
-4. ▶️ Let the embedded **PowerShell** script run automatically
-
----
-
-⏱️ After a few minutes:
-
-- ✅ The **Azure Arc** resource will appear in the Azure portal  
-- 📦 The `Azure Monitor Agent (AMA)` extension will be applied automatically  
-- 🔐 Logs will be collected **privately** via **AMPLS**
-
-![image](https://github.com/user-attachments/assets/2dbe7366-be7e-404e-af13-cd8d52a78f97)
-
-![image](https://github.com/user-attachments/assets/cbc32083-6e79-4cb0-bc39-ee25c89abc0c)
-
-![image](https://github.com/user-attachments/assets/1b67babf-aec9-4592-86f5-29c1b1534591)
 
 ---
 ## 🧪 Test Result
