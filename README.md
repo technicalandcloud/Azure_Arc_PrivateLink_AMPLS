@@ -31,9 +31,9 @@ This Terraform configuration deploys a full Azure Arc-enabled infrastructure sce
   - `Client ID`
   - `Client Secret`
   - `Tenant ID`
-  - 'Subscription ID'
-  - 'VM Password'
-  - 'VM User'
+  - `Subscription ID`
+  - `Username for VM`
+  - `Passord for VM`
 
 
 ---
