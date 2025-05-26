@@ -139,6 +139,34 @@ msiexec /i AzureConnectedMachineAgent.msi /l*v installationlog.txt /qn | Out-Str
 --correlation-id "e5089a61-0238-48fd-91ef-f67846168001" `
 --tags "Project=jumpstart_azure_arc_servers" 
 
+# Install AMA extension after Arc onboarding
+$vmName = $env:COMPUTERNAME
+$rgName = $env:resourceGroup
+$location = $env:Location
+
+# Check if already installed
+$existing = az connectedmachine extension show `
+  --machine-name $vmName `
+  --resource-group $rgName `
+  --name "AzureMonitorWindowsAgent" `
+  --query "name" -o tsv 2>$null
+
+if (-not $existing) {
+    Write-Host "Installing Azure Monitor Agent extension..."
+    az connectedmachine extension create `
+      --name "AzureMonitorWindowsAgent" `
+      --machine-name $vmName `
+      --resource-group $rgName `
+      --location $location `
+      --publisher "Microsoft.Azure.Monitor" `
+      --type "AzureMonitorWindowsAgent" `
+      --type-handler-version "1.10" `
+      --settings "{}"
+} else {
+    Write-Host "AMA extension already present."
+}
+
+
 # Remove schedule task
 Unregister-ScheduledTask -TaskName "LogonScript" -Confirm:$False
 Stop-Process -Name powershell -Force
