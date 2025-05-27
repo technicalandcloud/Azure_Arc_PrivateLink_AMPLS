@@ -4,7 +4,7 @@ Start-Transcript -Path C:\Temp\ArcInstallScript.log
 az login --service-principal -u $Env:appId -p $Env:password --tenant $Env:tenantId
 az account set -s $Env:SubscriptionId
 
-# Configure firewall and disable Azure Guest Agent
+# Disable Azure Guest Agent and block IMDS
 Write-Host "Configuring OS for Azure Arc agent..."
 Set-Service WindowsAzureGuestAgent -StartupType Disabled -Verbose
 Stop-Service WindowsAzureGuestAgent -Force -Verbose
@@ -29,71 +29,32 @@ Write-Host "Connecting to Azure Arc..."
     --correlation-id "e5089a61-0238-48fd-91ef-f67846168001" `
     --tags "Project=jumpstart_azure_arc_servers"
 
-# Wait briefly
+# Wait briefly to ensure Arc resource is ready
 Start-Sleep -Seconds 30
 
-# Ensure Azure CLI 'connectedmachine' extension is installed
-Write-Host "Installing Azure CLI extension: connectedmachine"
-az extension add --name connectedmachine --allow-preview --only-show-errors
+# --- NEW: Create and associate DCR using Microsoft official script ---
 
-# Install AMA extension
-$vmName = $env:COMPUTERNAME
-$rgName = $env:resourceGroup
-$location = $env:Location
-
-Write-Host "Checking for AMA extension..."
-try {
-    $existing = az connectedmachine extension show `
-        --machine-name $vmName `
-        --resource-group $rgName `
-        --name "AzureMonitorWindowsAgent" `
-        --query "name" -o tsv 2>$null
-
-    if (-not $existing) {
-        Write-Host "Installing Azure Monitor Agent extension..."
-        az connectedmachine extension create `
-            --name "AzureMonitorWindowsAgent" `
-            --machine-name $vmName `
-            --resource-group $rgName `
-            --location $location `
-            --publisher "Microsoft.Azure.Monitor" `
-            --type "AzureMonitorWindowsAgent" `
-            --type-handler-version "1.10" `
-            --settings "{}"
-    } else {
-        Write-Host "✅ AMA already installed."
-    }
-} catch {
-    Write-Host "⚠️ AMA installation failed or not ready: $_"
+Write-Host "Downloading Microsoft DCR creation script..."
+$scriptPath = "C:\Temp\Add-AMASecurityEventDCR.ps1"
+if (-not (Test-Path $scriptPath)) {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Azure/Microsoft-Defender-for-Cloud/main/Powershell%20scripts/Create%20AMA%20DCR%20for%20Security%20Events%20collection/Add-AMASecurityEventDCR.ps1" -OutFile $scriptPath
 }
 
-# Ensure CLI extension for DCR association
-Write-Host "Installing Azure CLI extension: monitor-control-service"
-az extension add --name monitor-control-service --only-show-errors
+Write-Host "Executing DCR setup..."
+& $scriptPath `
+  -DcrName "DCR-LogsEvents" `
+  -ResourceGroup $env:resourceGroup `
+  -SubscriptionId $env:SubscriptionId `
+  -Region $env:Location `
+  -LogAnalyticsWorkspaceARMId "/subscriptions/$($env:SubscriptionId)/resourceGroups/$($env:resourceGroup)/providers/Microsoft.OperationalInsights/workspaces/Arc-LogAnalytics" `
+  -EventFilter AllEvents
 
-# Associate to DCR
-Write-Host "Associating VM to Data Collection Rule..."
-try {
-    $resourceId = "/subscriptions/$($env:SubscriptionId)/resourceGroups/$($env:resourceGroup)/providers/Microsoft.HybridCompute/machines/$vmName"
-    $dcrId = "/subscriptions/$($env:SubscriptionId)/resourceGroups/$($env:resourceGroup)/providers/Microsoft.Insights/dataCollectionRules/DCR-LogsEvents"
-
-az monitor data-collection rule association create `
-  --resource $resourceId `
-  --rule $dcrId `
-  --name "dcr-assoc-$vmName" `
-  --only-show-errors
-
-
-    Write-Host "✅ DCR association completed."
-} catch {
-    Write-Host "❌ Failed to associate DCR: $_"
-}
+Write-Host "✅ DCR creation, AMA installation and association complete."
 
 # Cleanup scheduled task if present
 if (Get-ScheduledTask -TaskName "LogonScript" -ErrorAction SilentlyContinue) {
     Unregister-ScheduledTask -TaskName "LogonScript" -Confirm:$False
 }
 
-# Finalize
 Stop-Transcript
 exit
