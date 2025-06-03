@@ -29,7 +29,7 @@ try {
     $dpfqdn    = $arcDnsData[0].privateDnsZoneConfigs[2].recordSets[0].fqdn.Replace('.privatelink','')
     $dpIp      = $arcDnsData[0].privateDnsZoneConfigs[2].recordSets[0].ipAddresses[0]
 } catch {
-    Write-Host "Error during integration ARC PE"
+    Write-Host "⚠️ Error during Arc PE integration: $_"
 }
 
 try {
@@ -39,13 +39,14 @@ try {
         -o json | ConvertFrom-Json
 
     $records = $amplsDnsData[0].privateDnsZoneConfigs[0].recordSets
+
     for ($i = 0; $i -lt $records.Count; $i++) {
         $fqdn = $records[$i].fqdn.Replace('.privatelink','')
         $ip = $records[$i].ipAddresses[0]
         $hostfile += "$ip $fqdn"
     }
 } catch {
-    Write-Host "Error during integration AMPLS PE"
+    Write-Host "⚠️ Error during AMPLS PE integration: $_"
 }
 
 try {
@@ -55,37 +56,45 @@ try {
     $hostfile += "$agentIp $agentfqdn"
     $hostfile += "$gasIp $gasfqdn"
     $hostfile += "$dpIp $dpfqdn"
+
     Set-Content -Path $file -Value $hostfile -Force
-    Write-Host "File host update"
+    Write-Host "✅ Hosts file updated successfully."
 } catch {
-    Write-Host "Error During integration Host"
+    Write-Host "⚠️ Error updating hosts file: $_"
 }
 
 # Configure OS to allow Arc Agent
-Write-Host "Configure the OS to allow Azure Arc connected machine agent to be deployed on an Azure VM"
+Write-Host "🛠 Configuring OS for Azure Arc Agent"
 Set-Service WindowsAzureGuestAgent -StartupType Disabled -Verbose
 Stop-Service WindowsAzureGuestAgent -Force -Verbose
-New-NetFirewallRule -Name BlockAzureIMDS -DisplayName "Block access to Azure IMDS" -Enabled True -Profile Any -Direction Outbound -Action Block -RemoteAddress 169.254.169.254 
+New-NetFirewallRule -Name BlockAzureIMDS -DisplayName "Block access to Azure IMDS" -Enabled True -Profile Any -Direction Outbound -Action Block -RemoteAddress 169.254.169.254 -ErrorAction SilentlyContinue
 
 # Install Azure Arc Agent
-Write-Host "Onboarding to Azure Arc"
-function download() {$ProgressPreference="SilentlyContinue"; Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile AzureConnectedMachineAgent.msi}
+Write-Host "📦 Downloading Azure Arc Agent"
+function download() {
+    $ProgressPreference = "SilentlyContinue"
+    Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile AzureConnectedMachineAgent.msi
+}
 download
-msiexec /i AzureConnectedMachineAgent.msi /l*v installationlog.txt /qn | Out-String
 
+Write-Host "🚀 Installing Azure Arc Agent"
+msiexec /i AzureConnectedMachineAgent.msi /qn /l*v installationlog.txt | Out-String
+
+# Connect to Azure Arc using Private Link
+Write-Host "🔗 Connecting to Azure Arc via Private Link"
 & "$Env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" connect `
---resource-group $Env:resourceGroup `
---tenant-id $Env:tenantId `
---location $Env:Location `
---subscription-id $Env:SubscriptionId `
---cloud "AzureCloud" `
---private-link-scope $Env:PLscope `
---service-principal-id $Env:appId `
---service-principal-secret $Env:password `
---correlation-id "e5089a61-0238-48fd-91ef-f67846168001" `
---tags "Project=jumpstart_azure_arc_servers" 
-
+  --resource-group $Env:resourceGroup `
+  --tenant-id $Env:tenantId `
+  --location $Env:Location `
+  --subscription-id $Env:SubscriptionId `
+  --cloud "AzureCloud" `
+  --private-link-scope $Env:PLscope `
+  --service-principal-id $Env:appId `
+  --service-principal-secret $Env:password `
+  --correlation-id "e5089a61-0238-48fd-91ef-f67846168001" `
+  --tags "Project=jumpstart_azure_arc_servers"
 
 # Cleanup
-Unregister-ScheduledTask -TaskName "LogonScript" -Confirm:$False
-Stop-Process -Name powershell -Force
+Write-Host "🧹 Cleaning up"
+Unregister-ScheduledTask -TaskName "LogonScript" -Confirm:$False -ErrorAction SilentlyContinue
+Stop-Process -Name powershell -Force -ErrorAction SilentlyContinue
