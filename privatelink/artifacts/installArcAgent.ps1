@@ -41,9 +41,9 @@ try {
     $hostfile += "$agentIp $agentfqdn"
     $hostfile += "$gasIp $gasfqdn"
     $hostfile += "$dpIp $dpfqdn"
-    Write-Host "✅ Arc PE entries added"
+    Write-Host "Arc PE entries added"
 } catch {
-    Write-Host "⚠️ Error during ARC PE integration"
+    Write-Host "Error during ARC PE integration"
 }
 
 # --- AMPLS Private Endpoint Entries ---
@@ -58,19 +58,20 @@ try {
         $fqdn = $records[$i].fqdn.Replace('.privatelink','')
         $ip = $records[$i].ipAddresses[0]
         $hostfile += "$ip $fqdn"
-        Write-Host "✔️ Added: $ip $fqdn"
+        Write-Host "Added: $ip $fqdn"
     }
-    Write-Host "✅ AMPLS PE entries added"
+    Write-Host "AMPLS PE entries added"
 } catch {
-    Write-Host "⚠️ Error during AMPLS PE integration"
+    Write-Host "Error during AMPLS PE integration"
 }
+
 
 # Final update to hosts file
 try {
     Set-Content -Path $file -Value $hostfile -Force
-    Write-Host "✅ Hosts file updated successfully"
+    Write-Host "Hosts file updated successfully"
 } catch {
-    Write-Host "❌ Error during writing hosts file"
+    Write-Host "Error during writing hosts file"
 }
 
 
