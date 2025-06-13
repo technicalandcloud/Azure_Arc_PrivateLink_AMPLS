@@ -24,7 +24,8 @@ The goal is to understand and test:
 
 ## 📦 Repository Structure
 
-- `Terraform/`: Terraform scripts to deploy the full environment.
+- `Terraform/`: Terraform scripts to deploy the partial environment.
+- `Powershell/`: Powershell scripts to deploy the partial environment.
 - `privatelink/artifacts/`: Supporting files (scripts, configurations, etc.)
 
 ---
@@ -58,9 +59,7 @@ These identifiers are linked to the Main Service created earlier.
 ---
 ## ⚙️ Post-Deployment Steps
 
-After the Terraform deployment completes:
-
-1. 🔗 Link the **Private Endpoint** of the `Data Collection Endpoint (DCE)` to your **AMPLS**
+1. 🔗 add variable in script 
 2. 🧾 Verify that the **Private DNS Zone** contains the correct records
 3. 💻 Connect to the deployed VM using **Azure Bastion**
 4. ▶️ Let the embedded **PowerShell** script run automatically
