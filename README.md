@@ -150,7 +150,7 @@ Once the deployment and configuration are complete:
 ![image](https://github.com/user-attachments/assets/934640df-03ad-411c-9d78-744e924b6ebd)
 
 🧹 Cleanup / Destruction
-
+---
 When using `terraform destroy`, you may encounter issues related to the Azure Arc onboarding process:
 
 1. ❗ **Hybrid Machine resource not deleted**
