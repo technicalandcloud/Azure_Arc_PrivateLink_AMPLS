@@ -103,23 +103,23 @@ Once the VM is created, use Azure Bastion connect and confirm that:
 # Create Data Collection Rule 
 GO to DCR and Create you DCR
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png))
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png)
 
 Select Resource ARC 
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr2.png))
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr2.png)
 
 Add source 
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr3.png))
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr3.png)
 
 Add LAW
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr4.png))
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr4.png)
 
 If all is ok AMA have been installed
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png))
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png)
 
 # Run the final configuration script
 ```
