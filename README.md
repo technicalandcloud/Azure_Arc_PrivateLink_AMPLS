@@ -62,7 +62,7 @@ az ad sp create-for-rbac `
 ```
 
 Then load the credentials:
-```
+```powershell
 $spn = Get-Content ./spn.json | ConvertFrom-Json
 
 # ARM_* = used by Terraform provider
@@ -86,11 +86,11 @@ git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
 cd Azure_Arc_PrivateLink_AMPLS/Script
 ```
 #  Run the post-deployment setup (network, DNS, AMPLS)
-```
+```powershell
 .\monitor-setup-post.ps1
 ```
 # Deploy the infrastructure using Terraform
-```
+```terraform
 terraform init
 terraform apply -auto-approve
 ```
@@ -122,7 +122,7 @@ If all is ok AMA have been installed
 ![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png)
 
 # Run the final configuration script
-```
+```powershell
 .\monitor-setup-pre.ps1
 ```
 
