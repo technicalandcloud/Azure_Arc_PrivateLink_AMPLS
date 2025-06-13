@@ -49,7 +49,7 @@ The goal is to understand and test:
 ---
 
 # ✔ Service Principal Setup
-```
+```powershell
 az login
 $subId = az account show --query id -o tsv
 
