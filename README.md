@@ -46,15 +46,13 @@ az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscr
 ---
 ## 🚀 Deployment with Terraform
 
-Run the Terraform script by providing the following input variables:
+```bash
+git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
+cd Azure_Arc_PrivateLink_AMPLS/Script
 
-- `client_id`
-- `client_secret`
-- `tenant_id`
-- `subscription_id`
-- `admin_username`
-- `admin_password`
-These identifiers are linked to the Main Service created earlier.
+# Set up environment variables (SPN)
+$env:ARM_CLIENT_ID = "xxxx"
+$env:ARM_CLIENT_SECRET = "yyyy"
 
 ---
 ## ⚙️ Post-Deployment Steps
