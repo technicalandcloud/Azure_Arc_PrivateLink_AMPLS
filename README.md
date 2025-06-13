@@ -46,7 +46,7 @@ az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscr
 ---
 ## 🚀 Deployment with Terraform
 
-```bash
+
 git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
 cd Azure_Arc_PrivateLink_AMPLS/Script
 
