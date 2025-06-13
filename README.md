@@ -101,14 +101,28 @@ Once the VM is created, use Azure Bastion connect and confirm that:
 # Create Data Collection Rule 
 GO to DCR and Create you DCR
 
-- The machine is onboarded to Azure Arc
-- Network access is private-onl
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png))
+
+Select Resource ARC 
+
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr2.png))
+
+Add source 
+
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr3.png))
+
+Add LAW
+
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr4.png))
+
+If all is ok AMA have been installed
+
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png))
 
 # Run the final configuration script
 ```
 .\monitor-setup-pre.ps1
 ```
-This will validate DCE connectivity and finalize monitoring setup.
 
 ✅ Post-Deployment Checks
 ---
