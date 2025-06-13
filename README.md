@@ -24,9 +24,8 @@ The goal is to understand and test:
 
 ## 📦 Repository Structure
 
-- `Terraform/`: Terraform scripts to deploy the partial environment.
-- `Powershell/`: Powershell scripts to deploy the partial environment.
-- `privatelink/artifacts/`: Supporting files (scripts, configurations, etc.)
+- `Script/`: Contains both Terraform and PowerShell scripts.
+- `privatelink/artifacts/`: Supporting files (configurations, templates, etc.)
 
 ---
 
