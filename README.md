@@ -149,4 +149,26 @@ Once the deployment and configuration are complete:
 
 ![image](https://github.com/user-attachments/assets/934640df-03ad-411c-9d78-744e924b6ebd)
 
+🧹 Cleanup / Destruction
 
+When using `terraform destroy`, you may encounter issues related to the Azure Arc onboarding process:
+
+1. ❗ **Hybrid Machine resource not deleted**
+   - Even after destroying the VM, the associated `Microsoft.HybridCompute/machines/<vm-name>` resource may still exist.
+   - This resource must be deleted manually via Azure CLI:
+
+     ```bash
+     az resource delete \
+       --ids "/subscriptions/<your-subscription-id>/resourceGroups/Arc-Azure-RG/providers/Microsoft.HybridCompute/machines/<vm-name>"
+     ```
+
+2. ❗ **Manual deletion of resource groups may be required**
+   - In some cases, Terraform may be unable to delete the resource group due to lingering Arc-related resources (e.g., extensions, hybrid compute registrations).
+   - You can manually delete the resource groups from the [Azure Portal](https://portal.azure.com) or use the CLI:
+
+     ```bash
+     az group delete --name Arc-Azure-RG --yes --no-wait
+     az group delete --name Arc-OnPrem-RG --yes --no-wait
+     ```
+
+🔐 Use this option with caution, especially in production environments.
