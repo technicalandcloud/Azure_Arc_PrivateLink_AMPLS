@@ -47,12 +47,14 @@ az ad sp create-for-rbac -n "JumpstartArc" --role "Contributor" --scopes /subscr
 ## 🚀 Deployment with Terraform
 
 
+```bash
 git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
 cd Azure_Arc_PrivateLink_AMPLS/Script
 
 # Set up environment variables (SPN)
 $env:ARM_CLIENT_ID = "xxxx"
 $env:ARM_CLIENT_SECRET = "yyyy"
+```
 
 ---
 ## ⚙️ Post-Deployment Steps
@@ -67,19 +69,6 @@ $env:ARM_CLIENT_SECRET = "yyyy"
 
 ---
 
-⏱️ After a few minutes:
-
-- ✅ The **Azure Arc** resource will appear in the Azure portal  
-- 📦 The `Azure Monitor Agent (AMA)` extension will be applied automatically  
-- 🔐 Logs will be collected **privately** via **AMPLS**
-
-![image](https://github.com/user-attachments/assets/2dbe7366-be7e-404e-af13-cd8d52a78f97)
-
-![image](https://github.com/user-attachments/assets/cbc32083-6e79-4cb0-bc39-ee25c89abc0c)
-
-![image](https://github.com/user-attachments/assets/1b67babf-aec9-4592-86f5-29c1b1534591)
-
----
 ## 🧪 Test Result
 
 Once the deployment and configuration are complete:
