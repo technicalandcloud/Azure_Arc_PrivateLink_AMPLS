@@ -59,10 +59,13 @@ These identifiers are linked to the Main Service created earlier.
 ---
 ## ⚙️ Post-Deployment Steps
 
-1. 🔗 add variable in script 
-2. 🧾 Verify that the **Private DNS Zone** contains the correct records
-3. 💻 Connect to the deployed VM using **Azure Bastion**
-4. ▶️ Let the embedded **PowerShell** script run automatically
+1. 🔗 Launch `monitor-setup-post.ps1`
+2. 🛠️ Deploy the Terraform configuration
+3. 💻 Connect to the deployed VM once it's ready
+4. 🧭 Verify that the VM is onboarded to Azure Arc
+5. 📘 Assign a Data Collection Rule (DCR) to the Azure Arc-enabled machine
+6. 🎯 Launch the final script: `monitor-setup-pre.ps1`
+7. ✅ Done!
 
 ---
 
