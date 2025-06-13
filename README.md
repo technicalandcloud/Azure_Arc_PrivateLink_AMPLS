@@ -98,6 +98,12 @@ Once the VM is created, use Azure Bastion connect and confirm that:
 - The machine is onboarded to Azure Arc
 - Network access is private-only
 
+# Create Data Collection Rule 
+GO to DCR and Create you DCR
+
+- The machine is onboarded to Azure Arc
+- Network access is private-onl
+
 # Run the final configuration script
 ```
 .\monitor-setup-pre.ps1
