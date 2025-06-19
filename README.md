@@ -25,8 +25,6 @@ The goal is to understand and test:
 ## 📦 Repository Structure
 
 - `Script/`: Contains both Terraform and PowerShell scripts.
-- `privatelink/artifacts/`: Supporting files (configurations, templates, etc.)
-
 ---
 
 ## ✅ Prerequisites
