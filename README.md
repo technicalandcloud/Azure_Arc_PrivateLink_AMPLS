@@ -51,14 +51,28 @@ The goal is to understand and test:
 # ✔ Service Principal Setup
 
 ```powershell
+# Sign in to Azure
 az login
+
+# Retrieve the subscription ID
 $subId = az account show --query id -o tsv
 
-az ad sp create-for-rbac `
-  --name "JumpstartArc" `
-  --role "Contributor" `
-  --scopes "/subscriptions/$subId" `
-  --sdk-auth > spn.json
+# Create the service principal
+$sp = az ad sp create-for-rbac `
+    --name "JumpstartArc" `
+    --role "Contributor" `
+    --scopes "/subscriptions/$subId" `
+    --output json | ConvertFrom-Json
+# Manually construct the spn.json file
+$spn = @{
+    clientId       = $sp.appId
+    clientSecret   = $sp.password
+    subscriptionId = $subId
+    tenantId       = $sp.tenant
+}
+
+# Save as a JSON file
+$spn | ConvertTo-Json -Depth 10 | Out-File -Encoding utf8 spn.json
 ```
 
 Then load the credentials:
