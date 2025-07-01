@@ -58,16 +58,7 @@ az network private-dns link vnet create `
   --registration-enabled false
 
 
-# === Step 4: Link DNS Zone to the Azure VNet ===
-Write-Host "🔗 Linking DNS Zone to the Azure VNet..."
-az network private-dns link vnet create `
-  --resource-group $monitorResourceGroup `
-  --zone-name $dnsZoneName `
-  --name "${onPremVnetName}-dns-link" `
-  --virtual-network "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$azureVnetName" `
-  --registration-enabled false
-
-# === Step 5: Associate DNS Zone with the Private Endpoint ===
+# === Step 4: Associate DNS Zone with the Private Endpoint ===
 Write-Host "🔗 Associating DNS Zone with the Private Endpoint (via DNS Zone Group)..."
 az network private-endpoint dns-zone-group create `
   --resource-group $monitorResourceGroup `
@@ -76,7 +67,7 @@ az network private-endpoint dns-zone-group create `
   --zone-name $dnsZoneName `
   --private-dns-zone "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Network/privateDnsZones/$dnsZoneName"
 
-# === Step 6: Link Log Analytics Workspace to AMPLS ===
+# === Step 5: Link Log Analytics Workspace to AMPLS ===
 Write-Host "🔗 Linking Log Analytics Workspace to AMPLS..."
 az monitor private-link-scope scoped-resource create `
   --name "law-link" `
@@ -84,7 +75,7 @@ az monitor private-link-scope scoped-resource create `
   --scope-name $amplsName `
   --linked-resource "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.OperationalInsights/workspaces/$workspaceName"
 
-# === Step 7: Link Data Collection Endpoint (DCE) to AMPLS ===
+# === Step 6: Link Data Collection Endpoint (DCE) to AMPLS ===
 Write-Host "🔗 Linking DCE to AMPLS..."
 az monitor private-link-scope scoped-resource create `
   --name "dce-link" `
