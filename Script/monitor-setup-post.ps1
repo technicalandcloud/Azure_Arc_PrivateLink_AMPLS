@@ -57,12 +57,13 @@ az network private-dns link vnet create `
   --virtual-network "/subscriptions/$subscriptionId/resourceGroups/$onPremResourceGroup/providers/Microsoft.Network/virtualNetworks/$onPremVnetName" `
   --registration-enabled false
 
+
 # === Step 4: Link DNS Zone to the Azure VNet ===
 Write-Host "🔗 Linking DNS Zone to the Azure VNet..."
 az network private-dns link vnet create `
   --resource-group $monitorResourceGroup `
   --zone-name $dnsZoneName `
-  --name "${azureVnetName}-dns-link" `
+  --name "${onPremVnetName}-dns-link" `
   --virtual-network "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$azureVnetName" `
   --registration-enabled false
 
