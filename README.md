@@ -44,6 +44,11 @@ The goal is to understand and test:
 7. 🎯 verify if AMA is Install
 8. ✅ Done!
 
+# Clone the repository
+```
+git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
+cd Azure_Arc_PrivateLink_AMPLS/Script
+```
 ---
 
 # ✔ Service Principal Setup
@@ -71,6 +76,7 @@ $spn = [PSCustomObject]@{
 
 # Save as a JSON file
 $spn | ConvertTo-Json -Depth 10 | Out-File -FilePath "spn.json" -Encoding utf8
+
 ```
 
 Then load the credentials:
@@ -91,15 +97,9 @@ $env:TF_VAR_tenant_id       = $env:ARM_TENANT_ID
 
 ```
 # 🚀 Deployment Steps
-
-# Clone the repository
-```
-git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
-cd Azure_Arc_PrivateLink_AMPLS/Script
-```
-#  Run the post-deployment setup (network, DNS, AMPLS)
+#  Run the pre-deployment setup (network, DNS, AMPLS)
 ```powershell
-.\monitor-setup-post.ps1
+.\monitor-setup-pre.ps1
 ```
 # Deploy the infrastructure using Terraform
 ```terraform
@@ -135,7 +135,7 @@ If all is ok AMA have been installed
 
 # Run the final configuration script
 ```powershell
-.\monitor-setup-pre.ps1
+.\monitor-setup-post.ps1
 ```
 
 ✅ Post-Deployment Checks
