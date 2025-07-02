@@ -56,7 +56,8 @@ cd Azure_Arc_PrivateLink_AMPLS/Script
 ```powershell
 # Sign in to Azure
 az login
-
+```
+```powershell
 # Retrieve the subscription ID
 $subId = az account show --query id -o tsv
 
