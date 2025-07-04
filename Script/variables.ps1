@@ -1,4 +1,4 @@
-﻿# variables.ps1
+# variables.ps1
 
 # === Service Principal Authentication (secure via environment variables) ===
 $clientId       = $env:ARM_CLIENT_ID
@@ -18,6 +18,7 @@ $amplsName             = "arc-ampls"
 $peName                = "pe-arc-ampls"
 $connectionName        = "ampls-connection"
 $dnsZoneName           = "privatelink.monitor.azure.com"
+$dnsZoneNamelaw        = "privatelink.ods.opinsights.azure.com"
 $dnsZoneGroupName      = "ampls-dns-zone-group"
 $azureVnetName         = "arc-azure-vnet"
 $azureSubnetName       = "azure-subnet"
