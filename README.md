@@ -5,7 +5,7 @@ This repository provides a complete sandbox environment to explore **Azure Arc**
 > ℹ️ This project is based on the community work from [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
 > The Terraform code has been adapted from Jumpstart deployments to build a private environment integrating Azure Arc, AMPLS, and Private Link.
 
----
+
 
 ## 🎯 Purpose
 
@@ -20,19 +20,19 @@ The goal is to understand and test:
 
 > ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
 
----
+
 
 ## 📦 Repository Structure
 
 - `Script/`: Contains both Terraform and PowerShell scripts.
----
+
 
 ## ✅ Prerequisites
 
 - Azure CLI
 - Terraform installed locally
 - A **Service Principal** with `Contributor` role on a **subscription**
----
+
 ## ⚙️ Post-Deployment Steps
 
 1. 🔗 Launch `monitor-setup-post.ps1`
@@ -49,7 +49,7 @@ The goal is to understand and test:
 git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
 cd Azure_Arc_PrivateLink_AMPLS/Script
 ```
----
+
 
 ## ✔ Service Principal Setup
 
@@ -140,7 +140,7 @@ If all is ok AMA have been installed
 ```
 
 ✅ Post-Deployment Checks
----
+
 After a few minutes:
 
 ✅ The Azure Arc machine appears in Azure
@@ -163,7 +163,7 @@ Once the deployment and configuration are complete:
 ![image](https://github.com/user-attachments/assets/934640df-03ad-411c-9d78-744e924b6ebd)
 
 ## 🧹 Cleanup / Destruction
----
+
 When using `terraform destroy`, you may encounter issues related to the Azure Arc onboarding process:
 
 1. ❗ **Hybrid Machine resource not deleted**
