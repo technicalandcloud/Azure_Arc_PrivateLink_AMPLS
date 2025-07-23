@@ -15,7 +15,7 @@ The goal is to understand and test:
 - How **AMPLS** works in a private network
 - DNS resolution via **Private DNS Zones**
 
-![image](https://github.com/user-attachments/assets/5207efe9-5d78-4bd6-96ec-093443f87a7a)
+![image](https://github.com/user-attachments/assets/5207efe9-5d78-4bd6-96ec-093443f87a7a?raw=true)
 
 
 > ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
@@ -116,23 +116,23 @@ Once the VM is created, use Azure Bastion connect and confirm that:
 ### Create Data Collection Rule 
 GO to DCR and Create you DCR
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png?raw=true)
 
 Select Resource ARC 
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr2.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr2.png?raw=true)
 
 Add source 
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr3.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr3.png?raw=true)
 
 Add LAW
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr4.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr4.png?raw=true)
 
 If all is ok AMA have been installed
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png?raw=true)
 
 ### Run the final configuration script
 ```powershell
@@ -160,7 +160,7 @@ Once the deployment and configuration are complete:
 - 🔍 You can view logs **privately** through **AMPLS**  
 - 🧠 Data collection and monitoring work securely via **Private Link**
 
-![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/finalcheck.png)
+![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/finalcheck.png?raw=true)
 
 ## 🧹 Cleanup / Destruction
 
