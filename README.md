@@ -44,14 +44,14 @@ The goal is to understand and test:
 7. 🎯 verify if AMA is Install
 8. ✅ Done!
 
-## Clone the repository
+### Clone the repository
 ```
 git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
 cd Azure_Arc_PrivateLink_AMPLS/Script
 ```
 
 
-## ✔ Service Principal Setup
+### ✔ Service Principal Setup
 
 ```powershell
 # Sign in to Azure
@@ -98,22 +98,22 @@ $env:TF_VAR_tenant_id       = $env:ARM_TENANT_ID
 
 ```
 ## 🚀 Deployment Steps
-##  Run the pre-deployment setup (network, DNS, AMPLS)
+###  Run the pre-deployment setup (network, DNS, AMPLS)
 ```powershell
 .\monitor-setup-pre.ps1
 ```
-## Deploy the infrastructure using Terraform
+### Deploy the infrastructure using Terraform
 ```terraform
 terraform init
 terraform apply -auto-approve
 ```
-## Connect to the onboarded VM
+### Connect to the onboarded VM
 Once the VM is created, use Azure Bastion connect and confirm that:
 
 - The machine is onboarded to Azure Arc
 - Network access is private-only
 
-## Create Data Collection Rule 
+### Create Data Collection Rule 
 GO to DCR and Create you DCR
 
 ![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/dcr1.png)
@@ -134,7 +134,7 @@ If all is ok AMA have been installed
 
 ![image](https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS/blob/main/asset/ama.png)
 
-## Run the final configuration script
+### Run the final configuration script
 ```powershell
 .\monitor-setup-post.ps1
 ```
