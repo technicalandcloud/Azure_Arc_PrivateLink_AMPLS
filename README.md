@@ -114,7 +114,7 @@ Once the VM is created, use Azure Bastion connect and confirm that:
 - Network access is private-only
 
 ### Create Data Collection Rule 
-GO to DCR and Create you DCR
+GO to DCR and Create you DCR with name arc-dcr and select arc-dce 
 
 ![image](./asset/dcr1.png?raw=true)
 
