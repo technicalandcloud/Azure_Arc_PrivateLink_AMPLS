@@ -143,7 +143,7 @@ If all is ok AMA have been installed
 ![image](./asset/ama.png?raw=true)
 
 In DCR don't forget connect DCE to Resource 
-![image](./asset/ama.png?raw=true)
+![image](./asset/DCEResource.png?raw=true)
 
 ### Run the final configuration script
 ```powershell
