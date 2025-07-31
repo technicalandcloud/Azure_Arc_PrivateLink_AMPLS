@@ -101,10 +101,8 @@ $env:TF_VAR_tenant_id       = $env:ARM_TENANT_ID
 ⚠️ Script Execution Policy – Important Note
 If you downloaded this script from the internet (e.g. via GitHub), PowerShell may block it by default due to execution policy restrictions.
 
-powershell -ExecutionPolicy Bypass -File .\monitor-setup-pre.ps1
-powershell -ExecutionPolicy Bypass -File .\monitor-setup-post.ps1
-
 ###  Run the pre-deployment setup (network, DNS, AMPLS)
+**powershell -ExecutionPolicy Bypass -File .\monitor-setup-pre.ps1**
 ```powershell
 .\monitor-setup-pre.ps1
 ```
@@ -146,6 +144,7 @@ In DCR don't forget connect DCE to Resource
 ![image](./asset/DCEResource.png?raw=true)
 
 ### Run the final configuration script
+**powershell -ExecutionPolicy Bypass -File .\monitor-setup-post.ps1**
 ```powershell
 .\monitor-setup-post.ps1
 ```
