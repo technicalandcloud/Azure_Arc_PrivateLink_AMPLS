@@ -81,12 +81,12 @@ az network private-endpoint dns-zone-group create `
   --private-dns-zone "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Network/privateDnsZones/$dnsZoneName"
 
 Write-Host "Adding ods.opinsights.azure.com DNS Zone to the same group"
-az network private-endpoint dns-zone-group create `
-  --resource-group $monitorResourceGroup `
-  --endpoint-name $peName `
-  --name $dnsZoneGroupName `
-  --zone-name $dnsZoneNamelaw `
-  --private-dns-zone "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Network/privateDnsZones/$dnsZoneNamelaw"
+az network private-endpoint dns-zone-group add `
+   --endpoint-name $peName `
+   --resource-group $monitorResourceGroup `
+   --name $dnsZoneGroupName `
+   --zone-name "ods-zone" `
+   --private-dns-zone "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Network/privateDnsZones/$dnsZoneNamelaw"
 
 # === Step 5: Link Log Analytics Workspace to AMPLS ===
 Write-Host "Linking Log Analytics Workspace to AMPLS"
@@ -105,3 +105,85 @@ az monitor private-link-scope scoped-resource create `
   --linked-resource "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Insights/dataCollectionEndpoints/$dceName"
 
 Write-Host "`nPost-deployment configuration completed successfully."
+
+
+$dceRecords = @()
+$records = az network private-dns record-set a list `
+  --zone-name $dnsZoneName `
+  --resource-group $monitorResourceGroup `
+  | ConvertFrom-Json
+
+foreach ($record in $records) {
+    foreach ($ip in $record.arecords) {
+        $dceRecords += @{
+            fqdn = "$($record.name).$dnsZoneName"
+            ip   = $ip.ipv4Address
+        }
+    }
+}
+
+
+$odsRecords = @()
+$dnsRecords = az network private-dns record-set a list `
+  --zone-name $dnsZoneNamelaw `
+  --resource-group $monitorResourceGroup `
+  | ConvertFrom-Json
+
+foreach ($record in $dnsRecords) {
+    foreach ($ip in $record.arecords) {
+        $odsRecords += @{
+            fqdn = "$($record.name).$dnsZoneNamelaw"
+            ip   = $ip.ipv4Address
+        }
+    }
+}
+
+
+
+
+# === Step 7: Build PowerShell script to update hosts file ===
+$psScript  = ""
+
+# Add DCE records to hosts
+foreach ($record in $dceRecords) {
+    $cleanFqdn = $record.fqdn.TrimEnd('.').Replace('.privatelink','')
+    if ($record.ip) {
+        Write-Host "Adding DCE entry: $cleanFqdn -> $($record.ip)"
+        $psScript += "Add-Content -Path 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Value '$($record.ip) $cleanFqdn'; "
+    }
+}
+
+# Add ODS records to hosts
+foreach ($record in $odsRecords) {
+    $cleanFqdn = $record.fqdn.TrimEnd('.').Replace('.privatelink','')
+    if ($record.ip) {
+        Write-Host "Adding ODS entry: $cleanFqdn -> $($record.ip)"
+        $psScript += "Add-Content -Path 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Value '$($record.ip) $cleanFqdn'; "
+    }
+}
+
+# Add monitor.azure.com records from PE
+foreach ($config in $dnsConfigs) {
+    foreach ($ip in $config.ipAddresses) {
+        $cleanFqdn = $config.fqdn.TrimEnd('.')
+        Write-Host " Adding Monitor entry: $cleanFqdn -> $ip"
+        $psScript += "Add-Content -Path 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Value '$ip $cleanFqdn'; "
+    }
+}
+
+# Display hosts content at the end for verification
+$psScript += " Get-Content 'C:\\Windows\\System32\\drivers\\etc\\hosts' "
+
+# === Step 8: Execute script on VM to update hosts file ===
+Write-Host " Updating hosts file on Windows VM: ArcDemo-VM"
+az vm run-command invoke `
+  --command-id RunPowerShellScript `
+  --name ArcDemo-VM `
+  --resource-group Arc-OnPrem-RG `
+  --scripts "$psScript"
+
+Write-Host "Hosts file successfully updated on Windows VM"
+
+
+
+Write-Host "`nPost-deployment configuration completed successfully, with DNS records created and /etc/hosts updated on arc-demo."
