@@ -51,7 +51,7 @@ Write-Host "Linking ods.opinsights.azure.com DNS Zone to the Azure VNet"
 az network private-dns link vnet create `
   --resource-group $monitorResourceGroup `
   --zone-name $dnsZoneNamelaw `
-  --name "${azureVnetName}-ods-dns-link" `
+  --name "${onPremVnetName}-ods-dns-link" `
   --virtual-network "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$azureVnetName" `
   --registration-enabled false
 
