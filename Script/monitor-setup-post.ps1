@@ -1,21 +1,21 @@
-# === monitor-setup-post.ps1 ===
+#  monitor-setup-post.ps1 
 
-# === Load shared environment variables ===
+
 . "$PSScriptRoot\variables.ps1"
 
-# === Azure login using Service Principal ===
+
 az login --service-principal --username $clientId --password $clientSecret --tenant $tenantId | Out-Null
 az account set --subscription $subscriptionId
 
 
-# === Retrieve Log Analytics Workspace ID ===
+
 Write-Host "Retrieving Log Analytics Workspace ID"
 $workspaceId = az monitor log-analytics workspace show `
   --resource-group $monitorResourceGroup `
   --workspace-name $workspaceName `
   --query id -o tsv
 
-# === Step 1: Create Private Endpoint for AMPLS ===
+
 Write-Host "Creating Private Endpoint for Azure Monitor Private Link Scope (AMPLS)"
 $subnetId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$azureVnetName/subnets/$azureSubnetName"
 
@@ -28,7 +28,7 @@ az network private-endpoint create `
   --group-id "azuremonitor" `
   --connection-name $connectionName
 
-# === Step 2: Create Private DNS Zones ===
+
 Write-Host "Creating Private DNS Zones"
 az network private-dns zone create `
   --resource-group $monitorResourceGroup `
@@ -38,7 +38,7 @@ az network private-dns zone create `
   --resource-group $monitorResourceGroup `
   --name $dnsZoneNamelaw 
 
-# === Step 3: Link DNS Zones to VNets ===
+
 Write-Host "Linking monitor.azure.com DNS Zone to the on-prem VNet"
 az network private-dns link vnet create `
   --resource-group $monitorResourceGroup `
@@ -55,7 +55,7 @@ az network private-dns link vnet create `
   --virtual-network "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$azureVnetName" `
   --registration-enabled false
 
-# === Step 4: Recreate DNS Zone Group with both DNS Zones ===
+
 Write-Host "Checking if DNS Zone Group already exists for $peName"
 $existingGroup = az network private-endpoint dns-zone-group show `
   --resource-group $monitorResourceGroup `
@@ -88,7 +88,7 @@ az network private-endpoint dns-zone-group add `
    --zone-name "ods-zone" `
    --private-dns-zone "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.Network/privateDnsZones/$dnsZoneNamelaw"
 
-# === Step 5: Link Log Analytics Workspace to AMPLS ===
+
 Write-Host "Linking Log Analytics Workspace to AMPLS"
 az monitor private-link-scope scoped-resource create `
   --name "law-link" `
@@ -96,7 +96,7 @@ az monitor private-link-scope scoped-resource create `
   --scope-name $amplsName `
   --linked-resource "/subscriptions/$subscriptionId/resourceGroups/$monitorResourceGroup/providers/Microsoft.OperationalInsights/workspaces/$workspaceName"
 
-# === Step 6: Link Data Collection Endpoint (DCE) to AMPLS ===
+
 Write-Host "Linking DCE to AMPLS"
 az monitor private-link-scope scoped-resource create `
   --name "dce-link" `
@@ -141,7 +141,7 @@ foreach ($record in $dnsRecords) {
 
 
 
-# === Step 7: Build PowerShell script to update hosts file ===
+
 $psScript  = ""
 
 # Add DCE records to hosts
@@ -174,7 +174,7 @@ foreach ($config in $dnsConfigs) {
 # Display hosts content at the end for verification
 $psScript += " Get-Content 'C:\\Windows\\System32\\drivers\\etc\\hosts' "
 
-# === Step 8: Execute script on VM to update hosts file ===
+
 Write-Host " Updating hosts file on Windows VM: ArcDemo-VM"
 az vm run-command invoke `
   --command-id RunPowerShellScript `
@@ -185,5 +185,4 @@ az vm run-command invoke `
 Write-Host "Hosts file successfully updated on Windows VM"
 
 
-
-Write-Host "`nPost-deployment configuration completed successfully, with DNS records created and /etc/hosts updated on arc-demo."
+Write-Host "`Post-deployment configuration completed successfully, with DNS records created and /etc/hosts updated on arc-demo."
