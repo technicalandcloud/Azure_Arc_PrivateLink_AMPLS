@@ -40,6 +40,7 @@ resource "azurerm_windows_virtual_machine" "main" {
   identity {
     type = "SystemAssigned"
   }
+  bypass_platform_safety_checks_on_user_schedule_enabled = false
 }
 
 resource "azurerm_virtual_machine_run_command" "arc_onboard" {

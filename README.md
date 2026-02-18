@@ -137,6 +137,23 @@ That's it. Terraform will automatically:
 
 **No manual VM login required. No external scripts.**
 
+## 🔑 Retrieve VM Credentials
+
+After deployment, retrieve the VM admin credentials:
+```bash
+terraform output -json vm_credentials
+```
+
+Output example:
+```json
+{
+  "password": "aBcDeFgHiJkL1234",
+  "username": "arcadmin"
+}
+```
+
+Use these credentials to connect via **Azure Bastion** in the portal.
+
 ## ✔️ Post-Deployment Verification
 
 ### Via Azure Bastion (connect to the VM)

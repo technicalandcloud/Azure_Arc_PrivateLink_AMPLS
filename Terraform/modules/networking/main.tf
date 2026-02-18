@@ -240,11 +240,11 @@ resource "azapi_resource" "arc_private_link_scope" {
   parent_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_rg_name}"
   tags      = var.tags
 
-  body = jsonencode({
+  body = {
     properties = {
       publicNetworkAccess = "Disabled"
     }
-  })
+  }
 }
 
 data "azurerm_client_config" "current" {}

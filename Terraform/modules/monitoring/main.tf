@@ -80,9 +80,12 @@ resource "azurerm_monitor_private_link_scope" "main" {
   name                = "${var.name_prefix}-ampls"
   resource_group_name = var.rg_name
   tags                = var.tags
+
+  ingestion_access_mode = "PrivateOnly"
+  query_access_mode     = "PrivateOnly"
 }
 
-# Lier le Log Analytics Workspace à l'AMPLS
+
 resource "azurerm_monitor_private_link_scoped_service" "law" {
   name                = "law-link"
   resource_group_name = var.rg_name
@@ -90,7 +93,7 @@ resource "azurerm_monitor_private_link_scoped_service" "law" {
   linked_resource_id  = azurerm_log_analytics_workspace.main.id
 }
 
-# Lier le DCE à l'AMPLS
+
 resource "azurerm_monitor_private_link_scoped_service" "dce" {
   name                = "dce-link"
   resource_group_name = var.rg_name

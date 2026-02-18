@@ -1,29 +1,25 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.13.0"
 
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.100.0"
+      version = "~> 4.60.0"
     }
     azapi = {
       source  = "azure/azapi"
-      version = "~> 1.10.0"
+      version = "~> 2.3.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.5.0"
+      version = "~> 3.6.0"
     }
   }
 }
 
 provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-  skip_provider_registration = true
+  features {}
+  resource_provider_registrations = "none"
 }
 
 provider "azapi" {}
