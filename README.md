@@ -1,197 +1,244 @@
-# Azure Arc + AMPLS Sandbox (Private Environment)
+# Azure Arc + AMPLS Sandbox (Full Private Link)
 
 This repository provides a complete sandbox environment to explore **Azure Arc** and **Azure Monitor Private Link Scope (AMPLS)** in a **fully private setup using Azure Private Link**.
 
-> ℹ️ This project is based on the community work from [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
-> The Terraform code has been adapted from Jumpstart deployments to build a private environment integrating Azure Arc, AMPLS, and Private Link.
+Everything is deployed and configured **automatically via Terraform** — no manual scripts, no VM login required for onboarding.
 
-
+> ℹ️ This project is inspired by the community work from [Azure Arc Jumpstart](https://github.com/microsoft/azure_arc).  
+> The Terraform code has been built to deploy a fully private environment integrating Azure Arc, AMPLS, and Private Link.
 
 ## 🎯 Purpose
 
 The goal is to understand and test:
 
-- Hybrid machine onboarding with **Azure Arc**
-- How **AMPLS** works in a private network
+- Hybrid machine onboarding with **Azure Arc** via **Private Link**
+- How **AMPLS** (Azure Monitor Private Link Scope) works in a private network
 - DNS resolution via **Private DNS Zones**
+- Automated monitoring with **Azure Monitor Agent (AMA)** and **Data Collection Rules (DCR)**
 
-![image](./asset/Architecture.png)
-
+![Architecture](./asset/Architecture.png)
 
 > ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
 
+## 📦 Architecture Overview
 
+| Component | Description |
+|-----------|-------------|
+| **VNet OnPrem** (10.10.0.0/16) | Simulated on-premises network |
+| **VNet Azure** (10.20.0.0/16) | Azure cloud network |
+| **VNet Peering** | Connectivity between OnPrem and Azure |
+| **Windows Server 2025** | Simulated on-prem VM with Arc Agent + AMA |
+| **Azure Bastion** | Secure management access (RDP) |
+| **Arc Private Link Scope** | Private connectivity for Arc onboarding |
+| **AMPLS** | Private connectivity for Azure Monitor |
+| **Private DNS Zones** | Private name resolution for all endpoints |
+| **Log Analytics Workspace** | Centralized log storage |
+| **DCR** | Perf counters (CPU, Memory, Disk) + Windows Events |
 
-## 📦 Repository Structure
+### Traffic Flow
+```
+VM (10.10.x.x) → VNet Peering → Private Endpoints (10.20.1.x) → Arc PLS / AMPLS → Log Analytics
+```
 
-- `Script/`: Contains both Terraform and PowerShell scripts.
+**Zero internet exposure** — all traffic flows through Private Link endpoints.
 
+## 📁 Repository Structure
+```
+.
+├── main.tf                    # Root module - orchestration
+├── variables.tf               # Root variables
+├── outputs.tf                 # Root outputs
+├── providers.tf               # Provider configuration
+├── terraform.tfvars.example   # Example configuration (copy and fill)
+└── modules/
+    ├── networking/            # VNets, Peering, NSG, Private Endpoints, DNS Zones
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   └── outputs.tf
+    ├── compute/               # VM, Bastion, Arc onboarding, AMA extension
+    │   ├── main.tf
+    │   ├── arc_monitoring.tf
+    │   ├── variables.tf
+    │   └── outputs.tf
+    └── monitoring/            # Log Analytics, AMPLS, DCE, DCR, DNS Zones
+        ├── main.tf
+        ├── variables.tf
+        └── outputs.tf
+```
 
 ## ✅ Prerequisites
 
-- Azure CLI
-- Terraform installed locally
-- A **Service Principal** with `Contributor` role on a **subscription**
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) installed
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.5.0
+- A **Service Principal** with `Contributor` role on a subscription
 
-## ⚙️ Post-Deployment Steps
+## 🔧 Setup
 
-1. 🔗 Launch `monitor-setup-post.ps1`
-2. 🛠️ Deploy the Terraform configuration
-3. 💻 Connect to the deployed VM once it's ready
-4. 🧭 Verify that the VM is onboarded to Azure Arc
-5. 🎯 Launch the final script: `monitor-setup-pre.ps1`
-6. 📘 Assign a Data Collection Rule (DCR) to the Azure Arc-enabled machine
-7. 🎯 verify if AMA is Install
-8. ✅ Done!
-
-### Clone the repository
-```
+### 1. Clone the repository
+```bash
 git clone https://github.com/technicalandcloud/Azure_Arc_PrivateLink_AMPLS.git
-cd Azure_Arc_PrivateLink_AMPLS/Script
+cd Azure_Arc_PrivateLink_AMPLS
 ```
 
-
-### ✔ Service Principal Setup
-
+### 2. Create a Service Principal
 ```powershell
-# Sign in to Azure
 az login
-```
-```powershell
-# Retrieve the subscription ID
+
 $subId = az account show --query id -o tsv
 
-# Create the service principal
-$sp = az ad sp create-for-rbac `
-    --name "JumpstartArc" `
+az ad sp create-for-rbac `
+    --name "arc-lab-sp" `
     --role "Contributor" `
-    --scopes "/subscriptions/$subId" `
-    --output json | ConvertFrom-Json
-# Manually construct the spn.json file
-$spn = [PSCustomObject]@{
-    clientId       = $sp.appId
-    clientSecret   = $sp.password
-    subscriptionId = $subId
-    tenantId       = $sp.tenant
-}
-
-# Save as a JSON file
-$spn | ConvertTo-Json -Depth 10 | Out-File -FilePath "spn.json" -Encoding utf8
-
+    --scopes "/subscriptions/$subId"
 ```
 
-Then load the credentials:
-```powershell
-$spn = Get-Content ./spn.json | ConvertFrom-Json
+Note the `appId`, `password`, and `tenant` from the output.
 
-# ARM_* = used by Terraform provider
-$env:ARM_CLIENT_ID       = $spn.clientId
-$env:ARM_CLIENT_SECRET   = $spn.clientSecret
-$env:ARM_SUBSCRIPTION_ID = $spn.subscriptionId
-$env:ARM_TENANT_ID       = $spn.tenantId
-
-# TF_VAR_* = used by Terraform variable injection
-$env:TF_VAR_client_id       = $env:ARM_CLIENT_ID
-$env:TF_VAR_client_secret   = $env:ARM_CLIENT_SECRET
-$env:TF_VAR_subscription_id = $env:ARM_SUBSCRIPTION_ID
-$env:TF_VAR_tenant_id       = $env:ARM_TENANT_ID
-
+### 3. Configure Terraform variables
+```bash
+cp terraform.tfvars.example terraform.tfvars
 ```
-## 🚀 Deployment Steps
-⚠️ Script Execution Policy – Important Note
-If you downloaded this script from the internet (e.g. via GitHub), PowerShell may block it by default due to execution policy restrictions.
-**Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass**
-###  Run the pre-deployment setup (network, DNS, AMPLS)
 
-```powershell
-.\monitor-setup-pre.ps1
+Edit `terraform.tfvars` with your values:
+```hcl
+project_name      = "arc-lab"
+environment       = "dev"
+location          = "francecentral"
+
+tenant_id         = "<YOUR_TENANT_ID>"
+subscription_id   = "<YOUR_SUBSCRIPTION_ID>"
+arc_client_id     = "<YOUR_SP_CLIENT_ID>"
+arc_client_secret = "<YOUR_SP_CLIENT_SECRET>"
+
+vm_admin_username = "arcadmin"
+vm_admin_password = ""  # Leave empty for auto-generation
+
+enable_vpn_gateway = false
+enable_ampls       = true
 ```
-### Deploy the infrastructure using Terraform
-```terraform
+
+## 🚀 Deployment
+```bash
 terraform init
 terraform apply -auto-approve
 ```
-### Connect to the onboarded VM
-Once the VM is created, use Azure Bastion connect and confirm that:
 
-- The machine is onboarded to Azure Arc
-- Network access is private-only
+That's it. Terraform will automatically:
 
-### Create Data Collection Rule 
-GO to DCR and Create you DCR with 
-Name **arc-dcr**
-Data Collection Endpoint Select **arc-dce**
+1. ✅ Create 3 resource groups (onprem, azure, monitor)
+2. ✅ Deploy VNets with Peering
+3. ✅ Configure NSG and Private DNS Zones
+4. ✅ Deploy a Windows Server 2025 VM with Azure Bastion
+5. ✅ Install Azure CLI on the VM
+6. ✅ Block IMDS (so the VM behaves as true on-prem)
+7. ✅ Configure hosts file for Arc Private Link resolution
+8. ✅ Download and install the Arc Connected Machine Agent
+9. ✅ Onboard the VM to Azure Arc via Private Link
+10. ✅ Create Log Analytics Workspace, AMPLS, DCE, and DCR
+11. ✅ Install Azure Monitor Agent (AMA) via Arc extension
+12. ✅ Associate DCR and DCE to the Arc machine
 
-![image](./asset/dcr1.png?raw=true)
+**No manual VM login required. No external scripts.**
 
-Select Resource ARC 
+## ✔️ Post-Deployment Verification
 
-![image](./asset/dcr2.png?raw=true)
+### Via Azure Bastion (connect to the VM)
 
-Add source 
-
-![image](./asset/dcr3.png?raw=true)
-
-Add LAW
-
-![image](./asset/dcr4.png?raw=true)
-
-If all is ok AMA have been installed
-
-![image](./asset/ama.png?raw=true)
-
-In DCR don't forget connect DCE to Resource 
-![image](./asset/DCEResource.png?raw=true)
-
-### Run the final configuration script
-
+**Verify Arc Agent status:**
 ```powershell
-.\monitor-setup-post.ps1
+& "$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" show
+# Expected: Agent Status = Connected
+
+& "$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" check -p
+# Expected: All endpoints Reachable = true, Private = true
 ```
 
-✅ Post-Deployment Checks
+**Verify Private Link DNS resolution:**
+```powershell
+Resolve-DnsName "<WORKSPACE_ID>.ods.opinsights.azure.com"
+Resolve-DnsName "<WORKSPACE_ID>.oms.opinsights.azure.com"
+# Expected: resolves to private IPs (10.20.1.x)
+```
 
-After a few minutes:
+### Via Azure Portal
 
-✅ The Azure Arc machine appears in Azure
+- **Azure Arc > Servers** → VM status = `Connected`
+- **Arc > VM > Extensions** → `AzureMonitorWindowsAgent` = `Succeeded`
+- **Monitor > Private Link Scopes** → AMPLS with LAW and DCE linked
+- **Monitor > Data Collection Rules** → DCR with Arc machine associated
+- **Private DNS Zones** → Records resolving to private IPs
 
-📦 The Azure Monitor Agent (AMA) extension is installed
+### Via Log Analytics (KQL queries)
+```kql
+-- Heartbeat
+Heartbeat | where TimeGenerated > ago(30m) | project TimeGenerated, Computer, OSType
 
-🔐 Data flows privately through AMPLS
+-- CPU usage
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where TimeGenerated > ago(30m)
+| summarize AvgCPU = avg(CounterValue) by bin(TimeGenerated, 1m)
+| render timechart
 
-🧠 You can query logs in Log Analytics
+-- Memory
+Perf
+| where ObjectName == "Memory" and CounterName == "Available MBytes"
+| where TimeGenerated > ago(30m)
+| summarize avg(CounterValue) by bin(TimeGenerated, 1m)
+| render timechart
 
-## 🧪 Test Result
+-- Windows Events
+Event
+| where TimeGenerated > ago(1h)
+| summarize count() by EventLevelName, Source
+| render piechart
+```
 
-Once the deployment and configuration are complete:
+## 🔐 Proving Full Private Link
 
-- ✅ The **Azure Arc** resource is successfully onboarded  
-- 📦 The `Azure Monitor Agent (AMA)` extension is installed  
-- 🔍 You can view logs **privately** through **AMPLS**  
-- 🧠 Data collection and monitoring work securely via **Private Link**
+| Check | Expected Result |
+|-------|----------------|
+| `azcmagent check -p` | All endpoints `Private = true` |
+| `Resolve-DnsName *.ods.opinsights.azure.com` | IP = `10.20.1.x` |
+| `Resolve-DnsName *.oms.opinsights.azure.com` | IP = `10.20.1.x` |
+| `Test-NetConnection *.ods.opinsights.azure.com -Port 443` | `RemoteAddress = 10.20.1.x`, `TcpTestSucceeded = True` |
+| DCE in portal | `Public network access = Disabled` |
+| AMPLS in portal | LAW + DCE linked, PE = `Approved` |
+| IMDS request | Timeout (blocked by firewall rule) |
 
-![image](./asset/finalcheck.png?raw=true)
+## 🧹 Cleanup
+```bash
+terraform destroy -auto-approve
+```
 
-## 🧹 Cleanup / Destruction
+If the destroy hangs on Arc extensions:
+```bash
+# Delete the Arc machine manually
+az resource delete \
+  --ids "/subscriptions/<SUB_ID>/resourceGroups/<RG>/providers/Microsoft.HybridCompute/machines/<VM_NAME>"
 
-When using `terraform destroy`, you may encounter issues related to the Azure Arc onboarding process:
+# Or delete all resource groups
+az group delete --name arc-lab-dev-onprem-rg --yes --no-wait
+az group delete --name arc-lab-dev-azure-rg --yes --no-wait
+az group delete --name arc-lab-dev-monitor-rg --yes --no-wait
 
-1. ❗ **Hybrid Machine resource not deleted**
-   - Even after destroying the VM, the associated `Microsoft.HybridCompute/machines/<vm-name>` resource may still exist.
-   - This resource must be deleted manually via Azure CLI:
+# Clean Terraform state
+rm -rf .terraform/ terraform.tfstate*
+```
 
-     ```bash
-     az resource delete \
-       --ids "/subscriptions/<your-subscription-id>/resourceGroups/Arc-Azure-RG/providers/Microsoft.HybridCompute/machines/<vm-name>"
-     ```
+## 📝 Configuration Options
 
-2. ❗ **Manual deletion of resource groups may be required**
-   - In some cases, Terraform may be unable to delete the resource group due to lingering Arc-related resources (e.g., extensions, hybrid compute registrations).
-   - You can manually delete the resource groups from the [Azure Portal](https://portal.azure.com) or use the CLI:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `project_name` | `arc-lab` | Project name prefix |
+| `environment` | `dev` | Environment (dev, staging, prod) |
+| `location` | `francecentral` | Azure region |
+| `vm_size` | `Standard_D2s_v3` | VM size |
+| `vm_admin_password` | `""` (auto) | VM password (empty = auto-generated) |
+| `enable_vpn_gateway` | `false` | Use VPN Gateway instead of Peering |
+| `enable_ampls` | `true` | Deploy AMPLS + monitoring stack |
+| `log_retention_days` | `30` | Log retention in days |
 
-     ```bash
-     az group delete --name Arc-Azure-RG --yes --no-wait
-     az group delete --name Arc-OnPrem-RG --yes --no-wait
-     ```
+## 📄 License
 
-🔐 Use this option with caution, especially in production environments.
+This project is for educational purposes. See [LICENSE](LICENSE) for details.
