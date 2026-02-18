@@ -69,7 +69,7 @@ VM (10.10.x.x) → VNet Peering → Private Endpoints (10.20.1.x) → Arc PLS / 
 ## ✅ Prerequisites
 
 - [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) installed
-- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.5.0
+- [Terraform](https://developer.hashicorp.com/terraform/downloads)
 - A **Service Principal** with `Contributor` role on a subscription
 
 ## 🔧 Setup
