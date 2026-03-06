@@ -1,50 +1,36 @@
-output "workspace_id" {
-  description = "ID du Log Analytics Workspace"
-  value       = azurerm_log_analytics_workspace.main.id
+output "onprem_vnet_id" {
+  value = azurerm_virtual_network.onprem.id
 }
 
-output "workspace_name" {
-  description = "Nom du Log Analytics Workspace"
-  value       = azurerm_log_analytics_workspace.main.name
+output "azure_vnet_id" {
+  value = azurerm_virtual_network.azure.id
 }
 
-output "workspace_customer_id" {
-  description = "Customer ID (Workspace ID) pour les agents"
-  value       = azurerm_log_analytics_workspace.main.workspace_id
+output "onprem_default_subnet_id" {
+  value = azurerm_subnet.onprem_default.id
 }
 
-output "dce_id" {
-  description = "ID du Data Collection Endpoint"
-  value       = azurerm_monitor_data_collection_endpoint.main.id
+output "azure_subnet_id" {
+  value = azurerm_subnet.azure_default.id
 }
 
-output "dce_endpoint" {
-  description = "URL d'ingestion du DCE"
-  value       = azurerm_monitor_data_collection_endpoint.main.logs_ingestion_endpoint
+output "bastion_subnet_id" {
+  value = azurerm_subnet.bastion.id
 }
 
-output "ampls_id" {
-  description = "ID de l'Azure Monitor Private Link Scope"
-  value       = azurerm_monitor_private_link_scope.main.id
+output "arc_private_link_scope_id" {
+  value = azapi_resource.arc_private_link_scope.id
 }
 
-output "ampls_name" {
-  description = "Nom de l'AMPLS"
-  value       = azurerm_monitor_private_link_scope.main.name
+output "arc_private_link_scope_name" {
+  value = azapi_resource.arc_private_link_scope.name
 }
-
-output "dns_zones" {
-  description = "DNS zones créées"
-  value = {
-    monitor  = azurerm_private_dns_zone.monitor.name
-    oms      = azurerm_private_dns_zone.oms.name
-    ods      = azurerm_private_dns_zone.ods.name
-    agentsvc = azurerm_private_dns_zone.agentsvc.name
-    blob     = azurerm_private_dns_zone.blob.name
-  }
-}
-
-output "dcr_id" {
-  description = "ID de la Data Collection Rule"
-  value       = azurerm_monitor_data_collection_rule.main.id
+output "vpn_connections_ready" {
+  value = true
+  depends_on = [
+    azurerm_virtual_network_gateway_connection.azure_to_onprem,
+    azurerm_virtual_network_gateway_connection.onprem_to_azure,
+    azurerm_virtual_network_peering.onprem_to_azure,
+    azurerm_virtual_network_peering.azure_to_onprem,
+  ]
 }

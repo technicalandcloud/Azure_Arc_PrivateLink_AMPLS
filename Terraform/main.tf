@@ -56,16 +56,24 @@ module "networking" {
 
 module "compute" {
   source = "./modules/compute"
+  depends_on = [module.networking]
+  # Naming & Location
+  name_prefix  = local.name_prefix
+  location     = var.location
+  tags         = local.common_tags
+  environment  = var.environment
 
-  name_prefix         = local.name_prefix
-  location            = var.location
-  tags                = local.common_tags
-  rg_name             = azurerm_resource_group.main["onprem"].name
-  subnet_id           = module.networking.onprem_default_subnet_id
-  bastion_subnet_id   = module.networking.bastion_subnet_id
-  vm_size             = var.vm_size
-  admin_username      = var.vm_admin_username
-  admin_password      = local.vm_password
+  # Resource Group & Networking
+  rg_name           = azurerm_resource_group.main["onprem"].name
+  subnet_id         = module.networking.onprem_default_subnet_id
+  bastion_subnet_id = module.networking.bastion_subnet_id
+
+  # VM Configuration
+  vm_size        = var.vm_size
+  admin_username = var.vm_admin_username
+  admin_password = local.vm_password
+
+  # Arc Configuration
   arc_client_id       = var.arc_client_id
   arc_client_secret   = var.arc_client_secret
   arc_tenant_id       = var.tenant_id
@@ -73,9 +81,11 @@ module "compute" {
   arc_rg_name         = azurerm_resource_group.main["azure"].name
   arc_pls_id          = module.networking.arc_private_link_scope_id
   arc_pe_name         = "${local.name_prefix}-arc-pe"
-  enable_monitoring   = var.enable_ampls
-  dcr_id              = var.enable_ampls ? module.monitoring[0].dcr_id : ""
-  dce_id              = var.enable_ampls ? module.monitoring[0].dce_id : ""
+
+  # Monitoring
+  enable_monitoring = var.enable_ampls
+  dcr_id            = var.enable_ampls ? module.monitoring[0].dcr_id : null
+  dce_id            = var.enable_ampls ? module.monitoring[0].dce_id : null
 }
 
 module "monitoring" {

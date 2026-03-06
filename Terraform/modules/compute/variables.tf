@@ -1,83 +1,111 @@
+# ==================== NAMING & LOCATION ====================
 variable "name_prefix" {
-  type = string
+  description = "Prefix for resource names"
+  type        = string
 }
 
 variable "location" {
-  type = string
+  description = "Azure region"
+  type        = string
 }
 
 variable "tags" {
-  type = map(string)
+  description = "Resource tags"
+  type        = map(string)
 }
 
+variable "environment" {
+  description = "Environment name (dev, prod, etc.)"
+  type        = string
+  default     = "dev"
+}
+
+# ==================== RESOURCE GROUP ====================
 variable "rg_name" {
-  type = string
+  description = "Resource group name for VM"
+  type        = string
 }
 
+# ==================== NETWORKING ====================
 variable "subnet_id" {
-  type = string
+  description = "Subnet ID for VM NIC"
+  type        = string
 }
 
 variable "bastion_subnet_id" {
-  type = string
+  description = "Subnet ID for Bastion"
+  type        = string
 }
 
+# ==================== VM CONFIGURATION ====================
 variable "vm_size" {
-  type    = string
-  default = "Standard_D2s_v3"
+  description = "VM size"
+  type        = string
+  default     = "Standard_D2s_v3"
 }
 
 variable "admin_username" {
-  type = string
+  description = "VM admin username"
+  type        = string
 }
 
 variable "admin_password" {
-  type      = string
-  sensitive = true
+  description = "VM admin password"
+  type        = string
+  sensitive   = true
 }
 
+# ==================== AZURE ARC ====================
 variable "arc_client_id" {
-  type      = string
-  sensitive = true
+  description = "Service Principal ID for Arc onboarding (appId)"
+  type        = string
+  sensitive   = true
 }
 
 variable "arc_client_secret" {
-  type      = string
-  sensitive = true
+  description = "Service Principal Secret for Arc onboarding (password)"
+  type        = string
+  sensitive   = true
 }
 
 variable "arc_tenant_id" {
-  type = string
+  description = "Azure Tenant ID"
+  type        = string
 }
 
 variable "arc_subscription_id" {
-  type = string
+  description = "Azure Subscription ID"
+  type        = string
 }
 
 variable "arc_rg_name" {
-  type = string
+  description = "Resource group name for Arc registration (Azure RG)"
+  type        = string
 }
 
 variable "arc_pls_id" {
-  type = string
+  description = "Arc Private Link Scope ID"
+  type        = string
 }
 
 variable "arc_pe_name" {
+  description = "Arc Private Endpoint name"
   type        = string
-  description = "Nom du Private Endpoint Arc"
 }
 
+# ==================== MONITORING ====================
 variable "enable_monitoring" {
-  type    = bool
-  default = false
+  description = "Enable Azure Monitor Agent"
+  type        = bool
+  default     = false
 }
 
 variable "dcr_id" {
   type    = string
-  default = ""
+  default = null
 }
 
 variable "dce_id" {
   type    = string
-  default = ""
+  default = null
 }

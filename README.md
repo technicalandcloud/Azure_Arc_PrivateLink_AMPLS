@@ -16,7 +16,7 @@ The goal is to understand and test:
 - DNS resolution via **Private DNS Zones**
 - Automated monitoring with **Azure Monitor Agent (AMA)** and **Data Collection Rules (DCR)**
 
-![Architecture](./asset/ArcAMPLS.png)
+![Architecture](./asset/ArcAMPLS.jpg)
 
 > ⚠️ This environment is intended for **testing and learning purposes only**. It **must not be used in production**.
 

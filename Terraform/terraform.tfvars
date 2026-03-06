@@ -32,7 +32,7 @@ azure_vnet_address_space  = "10.20.0.0/16"
 # VPN Gateway vs VNet Peering
 # - true  = VPN Gateway (~150€/mois) - simulate connexion between on-premises and Azure
 # - false = VNet Peering (gratuit) - sufficient for a lab
-enable_vpn_gateway = false
+enable_vpn_gateway = true
 
 # ============================================
 # MONITORING
