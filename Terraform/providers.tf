@@ -10,6 +10,10 @@ terraform {
       source  = "azure/azapi"
       version = "~> 2.3.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6.0"
@@ -18,7 +22,13 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      # The Arc machine is created by azcmagent (not by Terraform), so it is not in the state.
+      # Without this, `terraform destroy` fails on the Azure RG that still contains it.
+      prevent_deletion_if_contains_resources = false
+    }
+  }
   resource_provider_registrations = "none"
 }
 

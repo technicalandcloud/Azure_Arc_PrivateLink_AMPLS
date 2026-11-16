@@ -25,3 +25,13 @@ output "arc_private_link_scope_id" {
 output "arc_private_link_scope_name" {
   value = azapi_resource.arc_private_link_scope.name
 }
+
+output "vpn_connections_ready" {
+  value = true
+  depends_on = [
+    azurerm_virtual_network_gateway_connection.azure_to_onprem,
+    azurerm_virtual_network_gateway_connection.onprem_to_azure,
+    azurerm_virtual_network_peering.onprem_to_azure,
+    azurerm_virtual_network_peering.azure_to_onprem,
+  ]
+}

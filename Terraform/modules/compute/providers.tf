@@ -5,5 +5,8 @@ terraform {
     azurerm = {
       source = "hashicorp/azurerm"
     }
+    time = {
+      source = "hashicorp/time"
+    }
   }
 }

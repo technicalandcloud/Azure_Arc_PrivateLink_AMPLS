@@ -5,7 +5,7 @@
     
 .DESCRIPTION
     This script runs during VM first boot to onboard the machine to Azure Arc.
-    Executed via custom_data (cloud-init for Windows).
+    Executed via azurerm_virtual_machine_run_command.
 #>
 
 # ==================== CONFIGURATION ====================
@@ -60,10 +60,14 @@ try {
         Write-Log "⚠️  IMDS block rule already exists or failed: $($_.Exception.Message)"
     }
 
+    # Required to allow azcmagent on an Azure VM (lab only)
+    [System.Environment]::SetEnvironmentVariable("MSFT_ARC_TEST", "true", [System.EnvironmentVariableTarget]::Machine)
+    $env:MSFT_ARC_TEST = "true"
+
     # ==================== STEP 2: INSTALL AZURE CLI ====================
     Write-Log ""
     Write-Log "[2/7] Installing Azure CLI..."
-    Invoke-WebRequest -Uri "https://aka.ms/installazurecliwindows" -OutFile "C:\Temp\AzureCLI.msi"
+    Invoke-WebRequest -Uri "https://aka.ms/installazurecliwindows" -OutFile "C:\Temp\AzureCLI.msi" -UseBasicParsing
     Start-Process msiexec.exe -ArgumentList "/i", "C:\Temp\AzureCLI.msi", "/quiet", "/norestart" -Wait -NoNewWindow
     
     # Refresh PATH
@@ -78,7 +82,8 @@ try {
         -u $ARC_CLIENT_ID `
         -p $ARC_CLIENT_SECRET `
         --tenant $ARC_TENANT_ID | Out-Null
-    
+    if ($LASTEXITCODE -ne 0) { throw "az login failed (exit $LASTEXITCODE)" }
+
     az account set -s $ARC_SUBSCRIPTION_ID
     Write-Log "✅ Authenticated successfully"
 
@@ -112,7 +117,7 @@ try {
     # ==================== STEP 5: DOWNLOAD ARC AGENT ====================
     Write-Log ""
     Write-Log "[5/7] Downloading Azure Arc agent..."
-    Invoke-WebRequest -Uri "https://aka.ms/AzureConnectedMachineAgent" -OutFile "C:\Temp\AzureConnectedMachineAgent.msi"
+    Invoke-WebRequest -Uri "https://aka.ms/AzureConnectedMachineAgent" -OutFile "C:\Temp\AzureConnectedMachineAgent.msi" -UseBasicParsing
     Write-Log "✅ Agent downloaded"
 
     # ==================== STEP 6: INSTALL ARC AGENT ====================
