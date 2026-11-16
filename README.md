@@ -164,6 +164,14 @@ Data (Heartbeat, Perf) usually reaches Log Analytics **3 to 15 minutes** after t
 terraform output -json vm_credentials
 ```
 
+Output example:
+```json
+{
+  "password": "aBcDeFgHiJkL1234",
+  "username": "arcadmin"
+}
+```
+
 Use these credentials to connect via **Azure Bastion** in the portal.
 
 ## ✔️ Post-Deployment Verification
@@ -175,9 +183,48 @@ Use these credentials to connect via **Azure Bastion** in the portal.
 az resource show -g arc-lab-dev-azure-rg -n arc-lab-dev-vm `
   --resource-type Microsoft.HybridCompute/machines `
   --query "{status:properties.status, pls:properties.privateLinkScopeResourceId}"
+```
+```json
+{
+  "pls": "/subscriptions/<SUB_ID>/resourceGroups/arc-lab-dev-azure-rg/providers/Microsoft.HybridCompute/privateLinkScopes/arc-lab-dev-arc-pls",
+  "status": "Connected"
+}
+```
 
+```powershell
+# AMA extension: expect "Succeeded"
+az rest --method get `
+  --url "https://management.azure.com/subscriptions/<SUB_ID>/resourceGroups/arc-lab-dev-azure-rg/providers/Microsoft.HybridCompute/machines/arc-lab-dev-vm/extensions?api-version=2024-07-10" `
+  --query "value[].{name:name, state:properties.provisioningState}" -o table
+```
+```
+Name                      State
+------------------------  ---------
+AzureMonitorWindowsAgent  Succeeded
+```
+
+```powershell
+# AMPLS: expect PrivateOnly and an Approved private endpoint
+az resource show -g arc-lab-dev-monitor-rg -n arc-lab-dev-ampls `
+  --resource-type microsoft.insights/privateLinkScopes `
+  --query "properties.{ingestion:accessModeSettings.ingestionAccessMode, query:accessModeSettings.queryAccessMode, pe:privateEndpointConnections[].properties.privateLinkServiceConnectionState.status}"
+```
+```json
+{
+  "ingestion": "PrivateOnly",
+  "pe": [ "Approved" ],
+  "query": "PrivateOnly"
+}
+```
+
+```powershell
 # VPN mode only: expect "Connected" on both connections
-az network vpn-connection show -g arc-lab-dev-onprem-rg -n arc-lab-dev-onprem-to-azure --query connectionStatus
+az network vpn-connection show -g arc-lab-dev-onprem-rg -n arc-lab-dev-onprem-to-azure --query connectionStatus -o tsv
+az network vpn-connection show -g arc-lab-dev-azure-rg  -n arc-lab-dev-azure-to-onprem --query connectionStatus -o tsv
+```
+```
+Connected
+Connected
 ```
 
 ### Via Azure Bastion (on the VM)
@@ -210,6 +257,10 @@ Get-Content C:\Windows\Temp\ArcBootstrap.log   # bootstrap script log
 union Heartbeat, Perf, Event
 | where TimeGenerated > ago(1h)
 | summarize count(), lastSeen = max(TimeGenerated) by Type, Computer
+// Expected (a few minutes after deployment):
+// Type       Computer         count_  lastSeen
+// Heartbeat  arc-lab-dev-vm   9       2026-11-16T09:12:37Z
+// Perf       arc-lab-dev-vm   97      2026-11-16T09:12:37Z
 
 // CPU usage
 Perf
