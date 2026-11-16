@@ -53,8 +53,16 @@ resource "azurerm_monitor_data_collection_rule" "main" {
     }
   }
 
+  # One data flow per stream, as the portal DCR wizard expects. A single flow
+  # with both streams shows up as "Unknown data source" in the portal, and any
+  # portal edit then fails with InvalidDataFlow (duplicate stream/destination).
   data_flow {
-    streams      = ["Microsoft-Event", "Microsoft-Perf"]
+    streams      = ["Microsoft-Perf"]
+    destinations = ["law-destination"]
+  }
+
+  data_flow {
+    streams      = ["Microsoft-Event"]
     destinations = ["law-destination"]
   }
 
