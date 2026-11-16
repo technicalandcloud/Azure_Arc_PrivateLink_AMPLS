@@ -1,6 +1,6 @@
 locals {
   name_prefix = "${var.project_name}-${var.environment}"
-  
+
   common_tags = merge(var.tags, {
     Project     = var.project_name
     Environment = var.environment
@@ -22,12 +22,12 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "random_password" "vm_password" {
-  count            = var.vm_admin_password == "" ? 1 : 0
-  length           = 16
-  special          = false
-  min_lower        = 3
-  min_upper        = 3
-  min_numeric      = 3
+  count       = var.vm_admin_password == "" ? 1 : 0
+  length      = 16
+  special     = false
+  min_lower   = 3
+  min_upper   = 3
+  min_numeric = 3
 }
 resource "random_string" "vpn_shared_key" {
   length  = 32
@@ -56,12 +56,13 @@ module "networking" {
 
 module "compute" {
   source = "./modules/compute"
-  depends_on = [module.networking]
+  # AMA must start only once the AMPLS private endpoint + DNS links exist
+  depends_on = [module.networking, module.monitoring]
   # Naming & Location
-  name_prefix  = local.name_prefix
-  location     = var.location
-  tags         = local.common_tags
-  environment  = var.environment
+  name_prefix = local.name_prefix
+  location    = var.location
+  tags        = local.common_tags
+  environment = var.environment
 
   # Resource Group & Networking
   rg_name           = azurerm_resource_group.main["onprem"].name

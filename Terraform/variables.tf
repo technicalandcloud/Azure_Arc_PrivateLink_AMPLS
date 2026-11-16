@@ -26,22 +26,42 @@ variable "arc_client_id" {
   description = "Service Principal Client ID for Azure Arc"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F-]{36}$", var.arc_client_id))
+    error_message = "arc_client_id must be a GUID (set TF_VAR_arc_client_id)."
+  }
 }
 
 variable "arc_client_secret" {
   description = "Service Principal Client Secret for Azure Arc"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(var.arc_client_secret) > 0
+    error_message = "arc_client_secret is empty (set TF_VAR_arc_client_secret)."
+  }
 }
 
 variable "tenant_id" {
   description = "Azure AD Tenant ID"
   type        = string
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F-]{36}$", var.tenant_id))
+    error_message = "tenant_id must be a GUID (set TF_VAR_tenant_id)."
+  }
 }
 
 variable "subscription_id" {
   description = "Azure Subscription ID"
   type        = string
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F-]{36}$", var.subscription_id))
+    error_message = "subscription_id must be a GUID (set TF_VAR_subscription_id)."
+  }
 }
 
 variable "vm_admin_username" {
@@ -60,7 +80,7 @@ variable "vm_admin_password" {
 variable "vm_size" {
   description = "VM size"
   type        = string
-  default     = "Standard_D2s_v3"
+  default     = "Standard_D2as_v7"
 }
 
 variable "onprem_vnet_address_space" {

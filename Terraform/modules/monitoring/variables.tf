@@ -1,42 +1,40 @@
 variable "name_prefix" {
-  type = string
+  description = "Préfixe pour le nommage des ressources"
+  type        = string
 }
 
 variable "location" {
-  type = string
+  description = "Région Azure"
+  type        = string
 }
 
 variable "tags" {
-  type = map(string)
+  description = "Tags à appliquer aux ressources"
+  type        = map(string)
 }
 
-variable "onprem_rg_name" {
-  type = string
+variable "rg_name" {
+  description = "Nom du Resource Group"
+  type        = string
 }
 
-variable "azure_rg_name" {
-  type = string
+variable "log_retention_days" {
+  description = "Durée de rétention des logs en jours"
+  type        = number
+  default     = 30
 }
 
-variable "onprem_vnet_address_space" {
-  type = string
+variable "azure_subnet_id" {
+  description = "ID du subnet Azure pour le Private Endpoint"
+  type        = string
 }
 
-variable "azure_vnet_address_space" {
-  type = string
+variable "onprem_vnet_id" {
+  description = "ID du VNet OnPrem pour les liens DNS"
+  type        = string
 }
 
-variable "enable_vpn_gateway" {
-  type    = bool
-  default = true
-}
-
-variable "vpn_shared_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "allowed_rdp_sources" {
-  type    = list(string)
-  default = []
+variable "azure_vnet_id" {
+  description = "ID du VNet Azure pour les liens DNS"
+  type        = string
 }

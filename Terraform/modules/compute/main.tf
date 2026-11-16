@@ -1,3 +1,8 @@
+locals {
+  # v6/v7 sizes (e.g. Standard_D2as_v7) only support NVMe; older sizes only SCSI
+  disk_controller_type = can(regex("_v[67]$", var.vm_size)) ? "NVMe" : "SCSI"
+}
+
 # ==================== NETWORK INTERFACE ====================
 resource "azurerm_network_interface" "vm" {
   name                = "${var.name_prefix}-vm-nic"
@@ -23,6 +28,7 @@ resource "azurerm_windows_virtual_machine" "main" {
   tags                = var.tags
 
   network_interface_ids = [azurerm_network_interface.vm.id]
+  disk_controller_type  = local.disk_controller_type
 
   os_disk {
     name                 = "${var.name_prefix}-vm-osdisk"
@@ -33,7 +39,7 @@ resource "azurerm_windows_virtual_machine" "main" {
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
-    sku       = "2025-Datacenter"
+    sku       = "2025-datacenter-g2" # Gen2: required by v6/v7 sizes, works with older ones
     version   = "latest"
   }
 
@@ -41,8 +47,8 @@ resource "azurerm_windows_virtual_machine" "main" {
     type = "SystemAssigned"
   }
 
-  provision_vm_agent                                      = true
-  allow_extension_operations                              = true
+  provision_vm_agent                                     = true
+  allow_extension_operations                             = true
   bypass_platform_safety_checks_on_user_schedule_enabled = false
 }
 

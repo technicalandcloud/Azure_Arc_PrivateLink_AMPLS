@@ -41,7 +41,7 @@ variable "bastion_subnet_id" {
 variable "vm_size" {
   description = "VM size"
   type        = string
-  default     = "Standard_D2s_v3"
+  default     = "Standard_D2as_v7"
 }
 
 variable "admin_username" {

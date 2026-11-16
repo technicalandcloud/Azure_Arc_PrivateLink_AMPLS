@@ -122,6 +122,37 @@ resource "azurerm_subnet_network_security_group_association" "onprem" {
   network_security_group_id = azurerm_network_security_group.onprem.id
 }
 
+
+# ============================================
+# NAT GATEWAY (accès internet sortant pour la VM)
+# ============================================
+resource "azurerm_public_ip" "nat" {
+  name                = "${var.name_prefix}-nat-pip"
+  location            = var.location
+  resource_group_name = var.onprem_rg_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = var.tags
+}
+
+resource "azurerm_nat_gateway" "onprem" {
+  name                = "${var.name_prefix}-nat-gw"
+  location            = var.location
+  resource_group_name = var.onprem_rg_name
+  sku_name            = "Standard"
+  tags                = var.tags
+}
+
+resource "azurerm_nat_gateway_public_ip_association" "onprem" {
+  nat_gateway_id       = azurerm_nat_gateway.onprem.id
+  public_ip_address_id = azurerm_public_ip.nat.id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "onprem" {
+  subnet_id      = azurerm_subnet.onprem_default.id
+  nat_gateway_id = azurerm_nat_gateway.onprem.id
+}
+
 # ============================================
 # VPN GATEWAYS (optionnel)
 # ============================================
@@ -133,6 +164,7 @@ resource "azurerm_public_ip" "onprem_gw" {
   resource_group_name = var.onprem_rg_name
   allocation_method   = "Static"
   sku                 = "Standard"
+  zones               = ["1", "2", "3"] # AZ gateway SKUs require a zone-redundant public IP
   tags                = var.tags
 }
 
@@ -143,6 +175,7 @@ resource "azurerm_public_ip" "azure_gw" {
   resource_group_name = var.azure_rg_name
   allocation_method   = "Static"
   sku                 = "Standard"
+  zones               = ["1", "2", "3"] # AZ gateway SKUs require a zone-redundant public IP
   tags                = var.tags
 }
 
@@ -155,7 +188,9 @@ resource "azurerm_virtual_network_gateway" "onprem" {
 
   type     = "Vpn"
   vpn_type = "RouteBased"
-  sku      = "VpnGw1"
+  # Non-AZ SKUs (VpnGw1-5) can no longer be created: NonAzSkusNotAllowedForVPNGateway
+  sku        = "VpnGw1AZ"
+  generation = "Generation1"
 
   ip_configuration {
     name                          = "default"
@@ -174,7 +209,9 @@ resource "azurerm_virtual_network_gateway" "azure" {
 
   type     = "Vpn"
   vpn_type = "RouteBased"
-  sku      = "VpnGw1"
+  # Non-AZ SKUs (VpnGw1-5) can no longer be created: NonAzSkusNotAllowedForVPNGateway
+  sku        = "VpnGw1AZ"
+  generation = "Generation1"
 
   ip_configuration {
     name                          = "default"
@@ -185,11 +222,11 @@ resource "azurerm_virtual_network_gateway" "azure" {
 }
 
 resource "azurerm_virtual_network_gateway_connection" "azure_to_onprem" {
-  count                           = var.enable_vpn_gateway ? 1 : 0
-  name                            = "${var.name_prefix}-azure-to-onprem"
-  location                        = var.location
-  resource_group_name             = var.azure_rg_name
-  tags                            = var.tags
+  count               = var.enable_vpn_gateway ? 1 : 0
+  name                = "${var.name_prefix}-azure-to-onprem"
+  location            = var.location
+  resource_group_name = var.azure_rg_name
+  tags                = var.tags
 
   type                            = "Vnet2Vnet"
   virtual_network_gateway_id      = azurerm_virtual_network_gateway.azure[0].id
@@ -198,11 +235,11 @@ resource "azurerm_virtual_network_gateway_connection" "azure_to_onprem" {
 }
 
 resource "azurerm_virtual_network_gateway_connection" "onprem_to_azure" {
-  count                           = var.enable_vpn_gateway ? 1 : 0
-  name                            = "${var.name_prefix}-onprem-to-azure"
-  location                        = var.location
-  resource_group_name             = var.onprem_rg_name
-  tags                            = var.tags
+  count               = var.enable_vpn_gateway ? 1 : 0
+  name                = "${var.name_prefix}-onprem-to-azure"
+  location            = var.location
+  resource_group_name = var.onprem_rg_name
+  tags                = var.tags
 
   type                            = "Vnet2Vnet"
   virtual_network_gateway_id      = azurerm_virtual_network_gateway.onprem[0].id
@@ -210,7 +247,7 @@ resource "azurerm_virtual_network_gateway_connection" "onprem_to_azure" {
   shared_key                      = var.vpn_shared_key
 }
 
-# Alternative sans VPN: VNet Peering (moins coûteux pour lab)
+# Without VPN Gateway: VNet Peering (less expensive for lab)
 resource "azurerm_virtual_network_peering" "onprem_to_azure" {
   count                     = var.enable_vpn_gateway ? 0 : 1
   name                      = "onprem-to-azure"
