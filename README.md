@@ -53,6 +53,7 @@ Arc and Azure Monitor traffic flows **only through Private Endpoints**. The NAT 
     ├── variables.tf                # Root variables (with validation)
     ├── outputs.tf                  # Root outputs
     ├── providers.tf                # azurerm, azapi, time, random
+    ├── preflight.tf                # Plan-time check of the Arc onboarding SP credentials
     ├── terraform.tfvars            # Non-secret configuration
     └── modules/
         ├── networking/             # VNets, Peering/VPN, NAT, NSG, Arc PLS + Private Endpoint, DNS Zones
@@ -100,6 +101,8 @@ Start-Sleep -Seconds 30   # let the SP propagate before the next role assignment
 az role assignment create --assignee $sp.appId --role Reader --scope "/subscriptions/$subId" -o none
 ```
 
+> ⚠️ Run `create-for-rbac` **only once**. Running it again with the same `--name` does not create a new SP: it **replaces the secret** of the existing one, and the previous secret stops working.
+>
 > The secret (`$sp.password`) is displayed only once. If you lose it, create a new one without revoking the others:
 > `az ad app credential reset --id <appId> --append --query password -o tsv`
 
@@ -116,6 +119,7 @@ $env:TF_VAR_arc_client_secret = $sp.password
 
 > ⚠️ Any value set in `terraform.tfvars` **overrides** the `TF_VAR_*` environment variables, even an empty string. Leave the credential lines commented out in `terraform.tfvars`.
 > The variables are validated: the plan fails immediately with a clear message if one of them is empty.
+> `terraform plan` also signs in as the Service Principal to check its credentials (`preflight.tf`): a wrong client ID or secret fails the plan within seconds, instead of failing ~15 minutes into `apply` when the VM runs the onboarding script.
 
 Environment variables only live in the current PowerShell session. Run `plan`, `apply` and `destroy` from the same window.
 
@@ -308,6 +312,7 @@ terraform destroy -var enable_vpn_gateway=true # VPN mode
 - The Arc machine is created by `azcmagent`, not by Terraform, so it is not in the state. The provider is configured with `prevent_deletion_if_contains_resources = false` so that the resource group containing it can still be deleted.
 - The Log Analytics workspace goes into **soft-delete for 14 days**. Redeploying with the same name automatically recovers it.
 - The Service Principal is **not** deleted. Remove it when you no longer need it: `az ad sp delete --id <appId>`.
+- If the Service Principal or its secret is already gone, skip the credentials check: `terraform destroy -var check_arc_sp_credentials=false`. The values of `TF_VAR_arc_client_id` / `TF_VAR_arc_client_secret` still need to be set (any GUID and any non-empty string).
 
 > If you delete the resource groups manually (portal or `az group delete`), the Terraform state no longer matches Azure. Move `terraform.tfstate*` out of the folder before redeploying.
 
@@ -319,6 +324,9 @@ terraform destroy -var enable_vpn_gateway=true # VPN mode
 | `NonAzSkusNotAllowedForVPNGateway` | Azure no longer accepts non-AZ VPN Gateway SKUs (`VpnGw1`-`5`) | Gateways use `VpnGw1AZ` with zone-redundant public IPs |
 | `InvalidPayload: Data collection rule is invalid` | The workspace was just recovered from soft-delete and is not yet a valid DCR destination | A 90-second wait is applied between the workspace and the DCR. If it still happens, run `apply` again |
 | `InvalidDataFlow: Duplicate data flows for a stream` when editing the DCR in the portal | The portal DCR wizard expects one data flow per stream; a single flow with several streams shows as "Unknown data source" | The DCR uses one data flow per stream (`Microsoft-Perf`, `Microsoft-Event`). Note that portal edits (e.g. custom XPath queries) are overwritten by the next `terraform apply` |
+| `AADSTS7000215: Invalid client secret provided` at plan time | The secret is wrong, expired, or belongs to another SP than `TF_VAR_arc_client_id`. Running `az ad sp create-for-rbac` again on an existing SP replaces its secret | Create a new secret for the SP you use, in the same window: `$env:TF_VAR_arc_client_secret = az ad app credential reset --id $env:TF_VAR_arc_client_id --append --query password -o tsv` |
+| `AADSTS700016: Application ... was not found` at plan time | Wrong `TF_VAR_arc_client_id` or `TF_VAR_tenant_id`, or the SP was deleted | Check the app ID with `az ad sp list --display-name <name> --query "[].appId"` |
+| `AuthorizationFailed` on `arc_sp_check` at plan time | The SP has no **Reader** role on the subscription, or the role assignment has not propagated yet | Assign Reader (see Prerequisites) and wait 1-2 minutes |
 | `parsing "/subscriptions//resourceGroups/..."` | A credential is empty, usually because `terraform.tfvars` overrides `TF_VAR_*` | Comment out the credential lines in `terraform.tfvars` |
 | Arc onboarding fails | Check `C:\Windows\Temp\ArcBootstrap.log` on the VM (via Bastion) | In VPN mode, both connections must be `Connected` before the VM is created (Terraform waits for the networking module) |
 
@@ -335,6 +343,7 @@ terraform destroy -var enable_vpn_gateway=true # VPN mode
 | `enable_vpn_gateway` | `false` | `true` = two `VpnGw1AZ` gateways (Vnet2Vnet) instead of VNet Peering |
 | `enable_ampls` | `true` | Deploy AMPLS + monitoring stack |
 | `log_retention_days` | `30` | Log retention in days |
+| `check_arc_sp_credentials` | `true` | Sign in as the onboarding SP at plan time to fail fast on wrong credentials. Set to `false` to destroy after the SP was deleted |
 | `tenant_id`, `subscription_id`, `arc_client_id`, `arc_client_secret` | (required) | Pass them as `TF_VAR_*` environment variables |
 
 ## 💶 Cost

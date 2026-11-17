@@ -32,4 +32,18 @@ provider "azurerm" {
   resource_provider_registrations = "none"
 }
 
+# Authenticates as the Arc onboarding Service Principal, only to validate its
+# credentials at plan time (see preflight.tf). When the check is disabled, the
+# credentials are left null and the provider falls back to the Azure CLI login,
+# so `terraform destroy` still works after the SP or its secret is gone.
+provider "azurerm" {
+  alias = "arc_onboarding"
+  features {}
+  tenant_id                       = var.tenant_id
+  subscription_id                 = var.subscription_id
+  client_id                       = var.check_arc_sp_credentials ? var.arc_client_id : null
+  client_secret                   = var.check_arc_sp_credentials ? var.arc_client_secret : null
+  resource_provider_registrations = "none"
+}
+
 provider "azapi" {}

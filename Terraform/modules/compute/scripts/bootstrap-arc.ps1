@@ -78,11 +78,23 @@ try {
     # ==================== STEP 3: LOGIN WITH SERVICE PRINCIPAL ====================
     Write-Log ""
     Write-Log "[3/7] Authenticating with Azure..."
-    az login --service-principal `
+    $ErrorActionPreference = "Continue"   # az writes to stderr; inspect the exit code instead
+    $loginOutput = az login --service-principal `
         -u $ARC_CLIENT_ID `
         -p $ARC_CLIENT_SECRET `
-        --tenant $ARC_TENANT_ID | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "az login failed (exit $LASTEXITCODE)" }
+        --tenant $ARC_TENANT_ID 2>&1 | Out-String
+    $loginExit = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
+    if ($loginExit -ne 0) {
+        $hint = switch -Regex ($loginOutput) {
+            'AADSTS7000215' { "Invalid client secret: expired, revoked, or it belongs to another Service Principal than arc_client_id. Running 'az ad sp create-for-rbac' again on an existing SP replaces its secret." }
+            'AADSTS700016'  { "Unknown client ID: check arc_client_id and tenant_id." }
+            'AADSTS90002'   { "Unknown tenant: check tenant_id." }
+            default         { "See the az login output below." }
+        }
+        Write-Log "az login output: $loginOutput"
+        throw "az login failed (exit $loginExit). $hint"
+    }
 
     az account set -s $ARC_SUBSCRIPTION_ID
     Write-Log "✅ Authenticated successfully"

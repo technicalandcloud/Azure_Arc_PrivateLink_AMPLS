@@ -64,6 +64,12 @@ variable "subscription_id" {
   }
 }
 
+variable "check_arc_sp_credentials" {
+  description = "Validate the Arc onboarding Service Principal credentials at plan time (set to false to destroy the lab after the SP was deleted)"
+  type        = bool
+  default     = true
+}
+
 variable "vm_admin_username" {
   description = "VM administrator username"
   type        = string
